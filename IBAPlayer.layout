@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Debug" />
+	<File name="AlsaPlayerCntr.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="6014" topLine="253" />
+	</File>
+	<File name="AlsaPlayerCntr.h" open="0" top="0" tabpos="2">
+		<Cursor position="1524" topLine="10" />
+	</File>
+	<File name="ConfigFile/ConfigFile.h" open="1" top="0" tabpos="5">
+		<Cursor position="4757" topLine="121" />
+	</File>
+	<File name="IBAConfig.cpp" open="1" top="0" tabpos="6">
+		<Cursor position="1593" topLine="51" />
+	</File>
+	<File name="IBAConfig.h" open="1" top="1" tabpos="4">
+		<Cursor position="2928" topLine="53" />
+	</File>
+	<File name="IBALogger.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="1615" topLine="91" />
+	</File>
+	<File name="IBALogger.h" open="0" top="0" tabpos="0">
+		<Cursor position="2719" topLine="46" />
+	</File>
+	<File name="IBAPlayer.cpp" open="1" top="0" tabpos="3">
+		<Cursor position="3996" topLine="129" />
+	</File>
+	<File name="IBAPlayer.h" open="0" top="0" tabpos="0">
+		<Cursor position="4269" topLine="115" />
+	</File>
+	<File name="IBATimers.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="2201" topLine="40" />
+	</File>
+	<File name="IBusCntr.h" open="0" top="0" tabpos="0">
+		<Cursor position="2846" topLine="0" />
+	</File>
+	<File name="IBusMsg.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="2660" topLine="11" />
+	</File>
+	<File name="IBusMsg.h" open="0" top="0" tabpos="0">
+		<Cursor position="1520" topLine="7" />
+	</File>
+	<File name="MusicLib/MusicLibDb.cpp" open="1" top="0" tabpos="2">
+		<Cursor position="7421" topLine="0" />
+	</File>
+	<File name="MusicLib/MusicLibDb.h" open="1" top="0" tabpos="1">
+		<Cursor position="1732" topLine="11" />
+	</File>
+	<File name="MusicLib/MusicLibio.cpp" open="0" top="0" tabpos="4">
+		<Cursor position="6059" topLine="21" />
+	</File>
+	<File name="MusicLib/MusicLibrary.cpp" open="0" top="0" tabpos="6">
+		<Cursor position="15136" topLine="96" />
+	</File>
+	<File name="MusicLib/MusicLibrary.h" open="0" top="0" tabpos="5">
+		<Cursor position="2844" topLine="53" />
+	</File>
+	<File name="MusicLib/TagRec.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="0" topLine="4" />
+	</File>
+	<File name="MusicLib/TagRec.h" open="0" top="0" tabpos="3">
+		<Cursor position="1780" topLine="111" />
+	</File>
+	<File name="sqlite3/sqlite3.h" open="0" top="0" tabpos="0">
+		<Cursor position="16808" topLine="367" />
+	</File>
+</CodeBlocks_layout_file>
