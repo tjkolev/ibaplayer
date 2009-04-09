@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 by TJ Kolev                                        *
+ *   Copyright (C) 2009 by TJ Kolev                                        *
  *   tjkolev@yahoo.com                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -24,7 +24,6 @@
 #include "MusicLib/MusicLibDb.h"
 
 IBAPlayer::IBAPlayer()
-    : m_mlibMngr(MusicLibMngr::getMLibMngr())
 {
 }
 
@@ -34,13 +33,9 @@ IBAPlayer::~IBAPlayer()
 
 bool IBAPlayer::initPlayer()
 {
-    //return m_ap.init(m_config, m_logger);
+    return m_ap.init();
 }
 
-MusicLibMngr&   IBAPlayer::getLibMngr()
-{
-    return m_mlibMngr;
-}
 
 AlsaPlayerCntr& IBAPlayer::getPlayer()
 {
@@ -86,15 +81,15 @@ int IBAPlayer::run()
 {
     Log("Starting player.\n");
 
-    m_mlibMngr.getLibrary().load();
-    m_mlibMngr.getBrowser().init();
+//    m_mlibMngr.getLibrary().load();
+//    m_mlibMngr.getBrowser().init();
 
     if(!initPlayer())
         return 2;
 
     m_timers.init();
 
-    // TODO m_ibus.init(m_config, m_logger, m_timers);
+    m_ibus.init(m_timers);
     m_msgProc.init(*this);
 
     // start a separate thread for ibus serial handling
@@ -104,6 +99,8 @@ int IBAPlayer::run()
     pthread_create(&m_threadIBusCntr, &thAttr, startIBusCntr, &m_ibus);
 
     play();
+
+    return 0;
 }
 
 //////////////////////////////////////////////
@@ -127,6 +124,15 @@ byte* strTohex(char* str, int len, byte* buff)
     return buff;
 }
 
+void PrintList(CascadeList_t& lst)
+{
+	cout << "List:" << endl;
+	for(CascadeList_t::const_iterator it = lst.begin();	it != lst.end(); it++)
+	{
+		const ListItem& item = (*it);
+		cout << item.Id << "|" << item.Name << "|" << item.Path << endl;
+	}
+}
 
 int main(int argc, char* argv[])
 {
@@ -136,17 +142,28 @@ int main(int argc, char* argv[])
 
     if(argc > 1)                // the first one is the config file
     {
-    	string cfgPath(argv[0]);
+    	string cfgPath(argv[1]);
 		IBAConfig::Config().init(cfgPath);
     }
 
 	IBALogger::Logger().setLogOutput(IBALogger::LOGO_FILE, GetConfigValue<string>(PRMS_LOG_FILE));
-	//int sl = GetConfigValue<int>(PRMS_SVR_LEVEL);
-	int sl = IBAConfig::Config().GetValue<int>(PRMS_SVR_LEVEL);
+	int sl = GetConfigValue<int>(PRMS_SVR_LEVEL);
 	IBALogger::Logger().setLogLevel(sl);
 
 	MusicLibDb musicDb;
 	musicDb.Open();
+	CascadeList_t lst;
+	musicDb.LoadGenres(lst);
+	PrintList(lst);
+	lst.clear();
+	musicDb.LoadArtists(lst);
+	PrintList(lst);
+	lst.clear();
+	musicDb.LoadTracksByArtist(lst, 1);
+	PrintList(lst);
+	lst.clear();
+	musicDb.LoadAlbumsByArtist(lst, 1);
+	PrintList(lst);
 	musicDb.Close();
 	return 0;
 	/*

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 by TJ Kolev                                        *
+ *   Copyright (C) 2009 by TJ Kolev                                        *
  *   tjkolev@yahoo.com                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -29,6 +29,7 @@
 #define  _SAVES(v,s)  file.write((char*) (&(v)), s)
 #define  _LOAD(v)     file.read((char*) (&(v)), sizeof(v))
 
+/*
 void MusicLibrary::savestr(ostream& file, const string& str)
 {
     // without the terminating 0x00
@@ -49,19 +50,21 @@ char* MusicLibrary::loadstr(istream& file)
     return m_rwbuff;
 }
 
+*/
+
 void TagRec::save(ostream& file)
 {
     //if(!file.is_open()) return;
-    
+
     compactChildRefs();
-    
+
     _SAVE(m_uid);
-    
-    MusicLibrary::savestr(file, m_tag);
+
+    //TODO MusicLibrary::savestr(file, m_tag);
 
     size_t count = m_childRefTbl.size();
     _SAVE(count);
-    
+
     for(size_t n = 0; n < count; n++)
         _SAVES(m_childRefTbl[n], sizeof(refndx_t));
 }
@@ -70,14 +73,14 @@ void TrackRec::save(ostream& file)
 {
     //if(!file.is_open()) return;
 
-    MusicLibrary::savestr(file, getTag());
-    
+    //TODO MusicLibrary::savestr(file, getTag());
+
     _SAVE(m_albumTblNdx);
     _SAVE(m_artistUid);
     _SAVE(m_genreUid);
     _SAVE(m_trackNum);
-    
-    MusicLibrary::savestr(file, m_file);
+
+    //TODO MusicLibrary::savestr(file, m_file);
 
 }
 
@@ -105,9 +108,9 @@ void TagTable::load(istream& file)
         taguid_t uid;
         _LOAD(uid);
 
-        char* ctag = MusicLibrary::loadstr(file);
+        char* ctag; //TODO  = MusicLibrary::loadstr(file);
         TagRec* tagRec = new TagRec(uid, string(ctag));
-        
+
         size_t childCount = 0;
         _LOAD(childCount);
         refndx_t refndx;
@@ -132,9 +135,9 @@ void TrackTable::load(istream& file)
 
     for(size_t n = 0; n < count; n++)
     {
-        char* ctag = MusicLibrary::loadstr(file);
+        char* ctag; //TODO = MusicLibrary::loadstr(file);
         string tag(ctag);
-        
+
         refndx_t albumTblNdx;
         _LOAD(albumTblNdx);
 
@@ -147,14 +150,14 @@ void TrackTable::load(istream& file)
         tracknum_t trackNum;
         _LOAD(trackNum);
 
-        char* cfname = MusicLibrary::loadstr(file);
-       
+        char* cfname; //TODO = MusicLibrary::loadstr(file);
+
         TrackRec* trackRec = new TrackRec(string(cfname),
                                             tag,
                                             trackNum,
                                             artistUid,
                                             genreUid);
-        
+
         trackRec->setAlbumTblNdx(albumTblNdx);
 
         m_tbl.push_back(trackRec);
@@ -163,7 +166,8 @@ void TrackTable::load(istream& file)
 
 
 //////////////////////////////////////////////////
-void MusicLibrary::reindex(/*const string& libDir*/)
+/*
+void MusicLibrary::reindex()
 {
     init();
 
@@ -178,12 +182,12 @@ void MusicLibrary::reindex(/*const string& libDir*/)
 
     m_albumTbl.sort();
     m_albumTbl.setChildRefs(m_artistTbl);
-    m_albumTbl.setParentRefs(m_trackTbl/*, false*/);
+    m_albumTbl.setParentRefs(m_trackTbl);
 
     m_trackTbl.sort();
 
     orderAlbumTracks();
-    
+
     save();
 }
 
@@ -200,7 +204,7 @@ void MusicLibrary::save()
     m_trackTbl.save(ndxFile);
 
     ndxFile.close();
-    
+
     ostringstream out;
     print(out);
     m_logger->log(out.str().c_str(), IBALogger::LOGS_INFO);
@@ -218,7 +222,7 @@ void MusicLibrary::load()
     m_trackTbl.load(ndxFile);
 
     ndxFile.close();
-    
+
     //print();
 }
 
@@ -228,7 +232,7 @@ using namespace TagLib;
 void MusicLibrary::scanDir()
 {
     for( file_iterator<> itFile(m_libPath);
-         itFile != itFile.end(); 
+         itFile != itFile.end();
          itFile.advance())
     {
         file_t currFile = *itFile;
@@ -237,14 +241,14 @@ void MusicLibrary::scanDir()
             continue;
 
         // TODO put in configuration.
-        // TODO find if file_iterator can do filtering        
+        // TODO find if file_iterator can do filtering
         if(fileName.substr(fileName.size() - 4, 4) != ".mp3")
             continue;
-            
+
         FileRef mfile(fileName.c_str(), true, AudioProperties::Fast);
         if(NULL == mfile.audioProperties())
             continue;
-        
+
         Tag* mtag = mfile.tag();
         if(NULL != mtag)
         {
@@ -255,22 +259,24 @@ void MusicLibrary::scanDir()
                         (mtag->title()).to8Bit(),
                         (tracknum_t) mtag->track());
         }
-        
+
     }
 }
 
 void MusicLibrary::print(ostream& output) const
 {
-    
+
     output << "\n\n*********************\nGenres:\n";
     m_genreTbl.print(output);
-    
+
     output << "\nArtists:\n";
     m_artistTbl.print(output);
-    
+
     output << "\nAlbums:\n";
     m_albumTbl.print(output);
-    
+
     output << "\nTracks:\n";
     m_trackTbl.print(output);
 }
+
+*/

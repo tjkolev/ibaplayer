@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 by TJ Kolev                                        *
+ *   Copyright (C) 2009 by TJ Kolev                                        *
  *   tjkolev@yahoo.com                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -31,12 +31,9 @@
 #include "../sqlite3/sqlite3.h"
 #include "../IBAConfig.h"
 #include "../IBALogger.h"
+#include "../IBAList.h"
 
 using namespace TagLib;
-
-class MusicLibMngr;
-
-//////////////////////////////////////////////
 
 class MusicLibDb
 {
@@ -46,19 +43,41 @@ public:
 
 	bool Open();
 	void Close();
+	bool Reindex();
+
+	void SaveSetting(const string& name, const string& value);
+	string LoadSetting(const string& name, const string& defaultValue);
+
+	void LoadGenres(CascadeList_t& lst);
+	void LoadArtists(CascadeList_t& lst);
+	void LoadAlbums(CascadeList_t& lst);
+	void LoadAlbumsByGenre(CascadeList_t& lst, int genreId);
+	void LoadAlbumsByArtist(CascadeList_t& lst, int artistId);
+	void LoadPlaylists(CascadeList_t& lst);
+
+	void LoadTracksByGenre(CascadeList_t&, int genreId);
+	void LoadTracksByGenreAlbum(CascadeList_t& lst, int genreId, int albumId);
+	void LoadTracksByArtist(CascadeList_t&, int artistId);
+	void LoadTracksByAlbum(CascadeList_t& lst, int albumId);
+	void LoadTracksByPlaylist(CascadeList_t& lst, int playlistId);
+	void LoadTracksRandomPick(CascadeList_t& lst, int count);
+
 
 private:
+	static const int	INVALID_SQL_ID = -1001;
+	static string		TAG_UNKNOWN;
+
 	bool	Create();
 	void	Populate();
 	void	PrepareAddStatements();
 	void	DisposeAddStatements();
 	int		AddGenre(Tag*);
 	int		AddArtist(Tag*);
-	int		AddAlbum(Tag*, int artistId);
+	int		AddAlbum(Tag*);
 	void	AddTrack(Tag*, const string& path);
 	int		AddPlaylist(const string& name, const string& path);
 	void	AddPlaylistTrack();
-
+	void	LoadList(CascadeList_t& lst, string& sql, int id1 = INVALID_SQL_ID, int id2 = INVALID_SQL_ID);
 	string				_dbPath;
 	sqlite3*			_db;
 
@@ -77,7 +96,8 @@ private:
 	string				_lastArtistName;
 	int					_lastArtistId;
 	string				_lastAlbumName;
-	int					_lastAlbumArtistId;
+	int                 _lastAlbumYear;
+	//int					_lastAlbumArtistId;
 	int					_lastAlbumId;
 	string				_lastPlaylistPath;
 	int					_lastPlaylistId;

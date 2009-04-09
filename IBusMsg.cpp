@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 by TJ Kolev                                        *
+ *   Copyright (C) 2009 by TJ Kolev                                        *
  *   tjkolev@yahoo.com                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -25,9 +25,9 @@
 IBusMsg* IBusMsgQueue::fillMsg(IBusMsg* msg, byte from, byte to, const byte* d, byte l)
 {
     if(NULL == msg) return NULL;
-    
+
     msg->mtype   = IBUS_MSG_TYPE;
-    
+
     msg->devFrom = from;
     msg->devTo   = to;
     memcpy(msg->data, d, l);
@@ -44,7 +44,7 @@ IBusMsgQueue& IBusMsgQueue::getQueue()
 IBusMsgQueue::IBusMsgQueue()
 {
     key_t mqKey = ftok(".", 0x01BA);
-    
+
     m_mqId = msgget(mqKey, IPC_CREAT | 0660);
     if(m_mqId < 0) // failed.
         return;
@@ -54,10 +54,10 @@ IBusMsgQueue::~IBusMsgQueue()
 {
     if(m_mqId < 0)
         return;
-    
+
     // delete the queue
     msgctl(m_mqId, IPC_RMID, NULL);
-    
+
     m_mqId = -1;
 }
 
@@ -75,43 +75,43 @@ bool IBusMsgQueue::hasMsg()
 {
     if(m_mqId < 0)
         return false;
-        
+
     int result = msgrcv(m_mqId, NULL, 0, IBUS_MSG_TYPE, IPC_NOWAIT);
     if(result < 1 && errno == E2BIG)
         return true;
-    
+
     return false;
 }
 
 IBusMsg* IBusMsgQueue::get(IBusMsg* msg)
 {
     if(NULL == msg || m_mqId < 0) return NULL;
-    
+
     int msize = sizeof(IBusMsg) - sizeof(msg->mtype);
     int result = msgrcv(m_mqId, msg, msize, IBUS_MSG_TYPE, IPC_NOWAIT);
     if(result < 0)
     {
         if(errno == ENOMSG)
             return NULL;
-            
+
         perror("Failed to get message from queue");
         return NULL;
     }
-    
+
     return msg;
 }
 
 /*void IBusMsgQueue::clear()
 {
     pthread_mutex_lock(&m_mutex);
-    
+
     // destroy all unpicked objects in queue;
     for(int ndx = m_tail; m_tail != m_head; m_tail = (m_tail + 1) % QUEUE_SIZE)
         delete m_queue[ndx];
-    
+
     m_head = 0;
     m_tail = m_head;
-    
+
     pthread_mutex_unlock(&m_mutex);
 }*/
 

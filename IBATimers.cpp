@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 by TJ Kolev                                        *
+ *   Copyright (C) 2009 by TJ Kolev                                        *
  *   tjkolev@yahoo.com                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *

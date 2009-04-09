@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 by TJ Kolev                                        *
+ *   Copyright (C) 2009 by TJ Kolev                                        *
  *   tjkolev@yahoo.com                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,8 +20,9 @@
 #ifndef _IBUS_PORT_H_
 #define _IBUS_PORT_H_
 
-#include "IBAConfig.h"
-#include "IBALogger.h"
+#include <string>
+
+using namespace std;
 
 typedef unsigned char byte;
 
@@ -35,32 +36,29 @@ public:
 class IBusPort
 {
 public:
-    
+
     IBusPort();
     ~IBusPort();
-    
-    bool            init(IBAConfig&, IBALogger&);
+
+    bool            init();
     void            closePort();
     void            resetPort();
-    
+
     bool            send(const byte* buffer, int len);
     void            receive();
     void            regListener(IBusPortListener&);
-    
+
 private:
-    
+
     bool            openPort();
-    
-    IBAConfig*          m_config;
-    IBALogger*          m_logger;
-    
+
     IBusPortListener*   m_portListener;
-    
+
     string              m_devPort;
     bool                m_monitorOnly;
     int                 m_fd;
 
-    static const int    SERIAL_BUFF_SIZE = 32;    
+    static const int    SERIAL_BUFF_SIZE = 32;
     byte                m_serialBuff[SERIAL_BUFF_SIZE];
 
 };

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 by TJ Kolev                                        *
+ *   Copyright (C) 2009 by TJ Kolev                                        *
  *   tjkolev@yahoo.com                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -58,7 +58,7 @@ bool cmpTags(const string& L, const string& R)
         rtagFrom = A_TAG_LEN;
     else if(0 == strncasecmp(rtag, START_THE_TAG, THE_TAG_LEN))
         rtagFrom = THE_TAG_LEN;
-    
+
     return (strcasecmp(ltag + ltagFrom, rtag + rtagFrom) < 0);
 }
 
@@ -134,10 +134,10 @@ refndx_t TagRec::getChildRefNdxAt(refndx_t& ndx) const
     int count = m_childRefTbl.size();
     assert(count);
     //if(count < 1) return NDX_INVALID;
-    
+
     if(NDX_FIRST == ndx) return m_childRefTbl[0];
     if(NDX_LAST == ndx) return m_childRefTbl[count-1];
-    
+
     // corrects the passed ndx
     ndx = (ndx + count) % count;
     return m_childRefTbl[ndx];
@@ -206,7 +206,7 @@ void TagRec::print(ostream& output) const
     output << " (";
     output << m_uid;
     output << ") ";
-    
+
     size_t count = m_childRefTbl.size();
     output << " [";
     for(refndx_t ndx = 0; ndx < count; ndx++)
@@ -224,7 +224,7 @@ void TagRec::print(ostream& output) const
     output << " [";
     for(refndx_t ndx = 0; ndx < count; ndx++)
         output << m_parentRefTbl[ndx] << ',';
-    
+
     output << "]\n";
 
 }
@@ -269,14 +269,14 @@ TagRec* TagTable::operator[](refndx_t ndx) const
 TagRec* TagTable::getRecAt(refndx_t& ndx) const
 {
     //if(NDX_INVALID == ndx) return NULL;
-    
+
     int count = m_tbl.size();
     assert(count);
     //if(count < 1) return NULL;
-    
+
     if(NDX_FIRST == ndx) return m_tbl[0];
     if(NDX_LAST == ndx) return m_tbl[count-1];
-    
+
     ndx = (ndx + count) % count; // corrects ndx
     return m_tbl[ndx];
 }
@@ -289,9 +289,9 @@ TagRec* TagTable::getRecAt(refndx_t& ndx) const
 TagRec* TagTable::reg(const string& tag, refndx_t& refndx, bool& isReg)
 {
     TagRec* tagrec = NULL;
-    
+
     isReg = true;
-    
+
     refndx_t ndx = lookUp(tag);
     if(NDX_INVALID == ndx)
     {
@@ -305,7 +305,7 @@ TagRec* TagTable::reg(const string& tag, refndx_t& refndx, bool& isReg)
     {
         tagrec = m_tbl[ndx];
     }
-    
+
     refndx = ndx;
 
     return tagrec;
@@ -366,7 +366,7 @@ UIDGen::~UIDGen()
     delete m_uidGen;
 }
 
-UIDGen& UIDGen::getUIDGen() 
+UIDGen& UIDGen::getUIDGen()
 {
     if(NULL == m_uidGen)
         m_uidGen = new UIDGen();

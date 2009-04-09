@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 by TJ Kolev                                        *
+ *   Copyright (C) 2009 by TJ Kolev                                        *
  *   tjkolev@yahoo.com                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -72,7 +72,7 @@ void TrackRec::print(ostream& output) const
     output << m_artistUid;
     output << " G:";
     output << m_genreUid;
-    output << ", ";   
+    output << ", ";
     output << m_file;
     output << '\n';
 
@@ -85,7 +85,7 @@ void TrackTable::add(TrackRec* trackRec)
 {
     if(NULL == trackRec)
         return;
-    
+
     m_tbl.push_back(trackRec);
 }
 

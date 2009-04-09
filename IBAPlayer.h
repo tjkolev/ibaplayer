@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 by TJ Kolev                                        *
+ *   Copyright (C) 2009 by TJ Kolev                                        *
  *   tjkolev@yahoo.com                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -23,8 +23,6 @@
 
 #include <string>
 #include "IBAVer.h"
-#include "IBAConfig.h"
-#include "IBALogger.h"
 #include "MusicLibrary.h"
 #include "AlsaPlayerCntr.h"
 #include "IBusCntr.h"
@@ -72,7 +70,7 @@ private:
     void            setMIDLabels(mode);
     void            resetOBC();
     void            clearOBC();
-    void            toBrowseMode(MusicLibBrowser::BrowseLevel);
+    void            toBrowseMode();
 
     mode                m_mode;
     bool                m_cdc_playing;
@@ -80,7 +78,6 @@ private:
     AlsaPlayerCntr*     m_alsa;
     IBusCntr*           m_ibus;
     MusicLibBrowser*    m_lib;
-    IBALogger*          m_log;
 
     unsigned long       m_respDelay;
 
@@ -108,7 +105,7 @@ public:
 	IBAPlayer();
 	virtual ~IBAPlayer();
 
-    MusicLibMngr&   getLibMngr();
+    //MusicLibMngr&   getLibMngr();
     AlsaPlayerCntr& getPlayer();
     IBusCntr&       getIBusCntr();
     IBATimers&      getTimers();
@@ -123,7 +120,7 @@ private:
     void             play();
 
     AlsaPlayerCntr   m_ap;
-    MusicLibMngr&    m_mlibMngr;
+    //MusicLibMngr&    m_mlibMngr;
     IBusCntr         m_ibus;
     MsgProcessor     m_msgProc;
     IBATimers        m_timers;

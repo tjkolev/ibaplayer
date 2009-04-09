@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 by TJ Kolev                                        *
+ *   Copyright (C) 2009 by TJ Kolev                                        *
  *   tjkolev@yahoo.com                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,6 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include "IBALogger.h"
+#include "IBAConfig.h"
 #include "AlsaPlayerCntr.h"
 
 AlsaPlayerCntr::AlsaPlayerCntr()
@@ -32,27 +34,21 @@ AlsaPlayerCntr::~AlsaPlayerCntr()
     stopAp();
 }
 
-bool AlsaPlayerCntr::init(IBAConfig& config, IBALogger& logger) 
+bool AlsaPlayerCntr::init()
 {
-    m_config = &config;
-    m_logger = &logger;
-    
-    //m_config->getValue(IBAConfig::PRM_ALSAPLAYER_SESSION, m_apSession);
-    m_config->getValue(IBAConfig::PRM_ALSAPLAYER_NAME, m_apName);
-    
-    string tagSep;
-    m_config->getValue(IBAConfig::PRM_TAG_SEPARATOR, tagSep);
+    m_apName = GetConfigValue<string>(PRMS_ALSAPLAYER_NAME);
+    string tagSep = GetConfigValue<string>(PRMS_TAG_SEPARATOR);
     m_tagSeparator[1] = tagSep[0];
-    
+
     if(!startAp())
     {
         const char* apFail = "Failed to start ALSAPlayer.";
-        m_logger->log(apFail, IBALogger::LOGS_CRASH);
+        Log(apFail, IBALogger::LOGS_CRASH);
         cout << apFail << endl;
-        
+
         return false;
     }
-    
+
     return true;
 }
 
@@ -73,19 +69,19 @@ bool AlsaPlayerCntr::isApRunning()
 
 bool AlsaPlayerCntr::startAp()
 {
-    if(isApRunning()) 
+    if(isApRunning())
     {
         cout << "Alsaplayer is already running" << endl;
         return true;
     }
-    
+
 /*    ostringstream apCmnd;
     apCmnd << "alsaplayer -q -i daemon -s " << m_apName << " &\n";
     cout << "Starting alsaplayer with:" << endl << apCmnd.str() << endl;
     int exitcode = system(apCmnd.str().c_str());
     if(0 != exitcode)
         return false;
-    
+
     int count = 4;
     while(count--)
     {
@@ -93,14 +89,15 @@ bool AlsaPlayerCntr::startAp()
         if(isApRunning())
             return true;
     }*/
-        
+
     return false;
 }
 
-bool AlsaPlayerCntr::stopAp()
+void AlsaPlayerCntr::stopAp()
 {
-    if(!isApRunning()) return true;
-    
+    if(!isApRunning())
+		return;
+
     ap_stop(m_apSession);
     ap_quit(m_apSession);
 }
@@ -141,13 +138,17 @@ void AlsaPlayerCntr::setLoop(bool isOn)
     ap_set_playlist_looping(m_apSession, isOn);
 }
 
-
-void AlsaPlayerCntr::add(const playlist_t& plist)
+void AlsaPlayerCntr::add(const char* path)
 {
-    for(playlist_t::const_iterator it = plist.begin();
+	ap_add_path(m_apSession, path);
+}
+
+void AlsaPlayerCntr::add(const CascadeList_t& plist)
+{
+    for(CascadeList_t::const_iterator it = plist.begin();
         it != plist.end();
         it++)
-        ap_add_path(m_apSession, (*it)->c_str());
+        ap_add_path(m_apSession, (*it).Name.c_str());
 }
 
 void AlsaPlayerCntr::clear()
@@ -215,25 +216,25 @@ char* AlsaPlayerCntr::getTimeInfo()
 {
     if(!isPlaying())
         return NULL;
-    
+
     formatTimeInfo();
     return m_timeInfo;
 }
 
+char* AlsaPlayerCntr::getFilePath()
+{
+	ap_get_file_path(m_apSession, m_path);
+	return m_path;
+}
+
 char* AlsaPlayerCntr::getFileName()
 {
-    ap_get_file_path(m_apSession, m_info);
-    
-    char* lastCh = strrchr(m_info, '/');
+    getFilePath();
+    char* lastCh = strrchr(m_path, '/');
     if(lastCh)
-        strcpy(m_info, lastCh + 1);
-    
-    // keep the file extension       
-    //lastCh = strrchr(m_info, '.');
-    //if(lastCh)
-    //    *lastCh = 0;
-        
-    return m_info;
+        strcpy(m_path, lastCh + 1);
+
+    return m_path;
 }
 
 void AlsaPlayerCntr::formatInfo()
@@ -265,13 +266,13 @@ bool AlsaPlayerCntr::isOnSameTrack()
     int result = ap_get_playlist_position(m_apSession, &currPosition);
     if(!result)
         return false;
-    
+
     if(currPosition != m_playlistPosition)
     {
         m_playlistPosition = currPosition;
         return false;
     }
-    
+
     return true;
 }
 
@@ -280,13 +281,13 @@ void AlsaPlayerCntr::formatTimeInfo()
     int pos = getPosition();
     int minutesPos = pos / 60;
     int secondsPos = pos % 60;
-    
+
     int len = getLength();
     int minutesLen = len / 60;
     int secondsLen = len % 60;
-        
-    sprintf(m_timeInfo, 
-            "%2.2u:%02.2u/%2.2u:%02.2u", 
+
+    sprintf(m_timeInfo,
+            "%2.2u:%02.2u/%2.2u:%02.2u",
             minutesPos, secondsPos, minutesLen, secondsLen);
 }
 
@@ -294,12 +295,12 @@ char* AlsaPlayerCntr::getMiscInfo()
 {
     // track_in_playlist/total_tracks kbps time
     // 1/52 192kbit    5:45
-    
+
     int trackCount = 0;
     ap_get_playlist_length(m_apSession, &trackCount);
     int trackPos = 0;
     ap_get_playlist_position(m_apSession, &trackPos);
-    char streamType[32]; 
+    char streamType[32];
     ap_get_stream_type(m_apSession, streamType);
     // MP3 44KHz stereo 192kbit
     snprintf(m_miscInfo, m_maxMiscInfoLen,
@@ -311,7 +312,7 @@ char* AlsaPlayerCntr::getMiscInfo()
     struct tm tmResult;
     localtime_r(&now, &tmResult);
     strftime(m_miscInfo + (m_maxMiscInfoLen - 5), 6, "%l:%M", &tmResult);
-    
+
     return m_miscInfo;
 }
-    
+

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 by TJ Kolev                                        *
+ *   Copyright (C) 2009 by TJ Kolev                                        *
  *   tjkolev@yahoo.com                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -22,8 +22,6 @@
 #define _ALSA_PLAYER_CNTR_H_
 
 #include "control.h"
-#include "IBAConfig.h"
-#include "IBALogger.h"
 #include "MusicLibrary.h"
 
 class AlsaPlayerCntr
@@ -31,11 +29,11 @@ class AlsaPlayerCntr
 public:
     AlsaPlayerCntr();
     ~AlsaPlayerCntr();
-    
-    bool init(IBAConfig&, IBALogger&);
+
+    bool init();
 
     bool isPlaying();
-        
+
     void play();
     void stop();
     void pause();
@@ -44,18 +42,20 @@ public:
 
     void setShuffle(bool);
     void setLoop(bool);
-    
-    void add(const playlist_t&);
+
+    void add(const CascadeList_t&);
+    void add(const char*);
     void clear();
-    
+
     char* getTrack();
     char* getTitle();
     char* getArtist();
     char* getAlbum();
     char* getGenre();
     char* getFileName();
+    char* getFilePath();
     char* getInfo();
-    
+
     int   getLength();
     int   getPosition();
     char* getTimeInfo();
@@ -64,40 +64,38 @@ public:
 private:
     bool    isApRunning();
     bool    startAp();
-    bool    stopAp();
-    
+    void    stopAp();
+
     bool    isOnSameTrack();
-    
+
     void    formatInfo();
     void    formatTimeInfo();
-    
-    IBALogger*        m_logger;
-    IBAConfig*        m_config;
-    
+
     int               m_apSession;
     string            m_apName;
-    
+
     int               m_playlistPosition;
-    
+
+	char	m_path[AP_FILE_PATH_MAX];
     char    m_track[AP_TRACK_NUMBER_MAX];
     char    m_title[AP_TITLE_MAX];
     char    m_album[AP_ALBUM_MAX];
     char    m_artist[AP_ARTIST_MAX];
     char    m_genre[AP_GENRE_MAX];
-    static const int m_maxInfoLen = AP_TRACK_NUMBER_MAX + 
+    static const int m_maxInfoLen = AP_TRACK_NUMBER_MAX +
                                     AP_TITLE_MAX +
                                     AP_ALBUM_MAX +
                                     AP_ARTIST_MAX +
                                     AP_GENRE_MAX +
                                     16;
     char    m_info[m_maxInfoLen + 1];
-    
+
     static const int m_maxMiscInfoLen = 20;
     char    m_miscInfo[m_maxMiscInfoLen + 1];
-    
+
     static const int m_maxTimeInfoLen = 15;
     char    m_timeInfo[m_maxTimeInfoLen + 1];
-    
+
     static const int m_maxTagSeparatorLen = 3;
     char    m_tagSeparator[m_maxTagSeparatorLen + 1];
 };

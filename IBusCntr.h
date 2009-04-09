@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 by TJ Kolev                                        *
+ *   Copyright (C) 2009 by TJ Kolev                                        *
  *   tjkolev@yahoo.com                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -122,34 +122,34 @@ class IBusCntr : public IBusPortListener, IBATimerListener
 public:
     IBusCntr();
     ~IBusCntr();
-    
-    bool            init(IBAConfig&, IBALogger&, IBATimers&);
+
+    bool            init(IBATimers&);
     void            run();
     void            setCDCplaying(bool);
     virtual void    haveData(byte* buffer, int len);
     virtual void    onTimer(IBATimers::timerID);
-    
+
     void            sendPacket(byte fromDev, byte toDev, const byte* data, int datalen);
     void            sendPacket(const byte* packet, int packet_size);
-    
+
     void            writeRadio(const char*);
     void            writeOBC(const char*);
-   
+
     static const char*      getDevTxt(byte d);
 
     static const byte THIS_DEVICE = IBUS_DEV_CD_CHANGER;
-        
+
     // the shortest packet is 5 bytes: src|len|dest|info_byte|chk
     static const int  MIN_PACKET_SIZE = 5;
     static const int  MIN_PACKET_LEN = MIN_PACKET_SIZE - 2; // min value for len field
-    
+
     // longest packet I've seen was 32 bytes
     static const int  MAX_PACKET_SIZE = 64; // twice for slack
     static const int  MAX_PACKET_LEN = MAX_PACKET_SIZE - 2;
-    
+
     static const int  RADIO_LCD_LEN = 11;
     static const int  OBC_LCD_LEN   = 20;
-    
+
 private:
     void             startAnnounce();
     void             stopAnnounce();
@@ -159,33 +159,31 @@ private:
     bool             checkSum(byte* buff, int len);
     void             processRcvPacket();
     void             pfmt(ostream& out, const byte* p);
-    
-    
-    IBAConfig*       m_config;
-    IBALogger*       m_logger;
+
+
     IBATimers*       m_timer;
-    
+
     IBusPort         m_ibus;
     bool             m_cdc_playing;
     int              m_ibusLogLevel;
     unsigned long    m_respDelay;
     time_t           m_pollWatch;
-    
+
     //bool             m_isPolled;
-    
+
     static const int  RECEIVE_BUFFER_SIZE = 128;
     byte              m_receiveBuff[RECEIVE_BUFFER_SIZE];
     int               m_head; // position to start parsing from
     int               m_tail; // position to start inserting from, post-increment
-    
+
     byte              m_inPacket[MAX_PACKET_SIZE];
     //byte              m_outPacket[MAX_PACKET_SIZE];
-    
+
     static const int  POFF_SRC = 0; // source offset in packet
     static const int  POFF_LEN = 1;
     static const int  POFF_DEST = 2;
     static const int  POFF_DATA = 3;
-    
+
 };
 
 #endif //_IBUS_CNTR_H_

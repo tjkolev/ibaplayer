@@ -17,74 +17,35 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef _IBA_TIMERS_H_
-#define _IBA_TIMERS_H_
 
-#include <signal.h>
-#include <time.h>
 
-class IBATimerListener;
+#ifndef IBALIST_H_INCLUDED
+#define IBALIST_H_INCLUDED
 
-class IBATimers
+#include <string>
+#include <vector>
+
+using namespace std;
+
+class ListItem
 {
-// keeping my own timer ticks with one timer
-// resolution and min interval is 200 milliseconds.
-
 public:
-    enum timerID
-    {
-        TI_ANNOUNCE = 0,
-        TI_TRACK_POS,
-        TI_TRACK_INFO,
+	ListItem(int id, string& name);
+	ListItem(int id, char* name);
 
-        _TI_COUNT_
-    };
+	int		Id;
+	string	Name;
+	string	Path;
+};
 
-    static const int MIN_INTERVAL = 200; //msec
+//typedef vector<ListItem> CascadeList_t;
+class CascadeList_t : public vector<ListItem>
+{
+public:
+	int			CurrentIndex;
 
-    IBATimers();
-    ~IBATimers();
-
-    void init();
-    void setTimer(timerID, float sec, IBATimerListener*);
-
-    void startAll();
-    void stopAll();
-    void start(timerID);
-    void stop(timerID);
-
-private:
-
-    struct timer_reg
-    {
-        int                 tiTicks;
-        int                 tiCfgTicks;
-        IBATimerListener*   listener;
-    };
-
-    typedef timer_reg ti_t;
-
-    int         secToTicks(float);
-    void        onTimer();
-
-    friend void timerHandler(sigval_t);
-
-    timer_t             m_sysTimerId;
-    struct itimerspec   m_tspec;
-    sigevent_t          m_sige;
-
-    ti_t                m_timers[_TI_COUNT_];
-
-    unsigned long       m_tickCount;
+	ListItem&	AtItem();
 };
 
 
-class IBATimerListener
-{
-public:
-    virtual void onTimer(IBATimers::timerID) = 0;
-};
-
-
-#endif
-
+#endif // IBALIST_H_INCLUDED

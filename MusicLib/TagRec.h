@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 by TJ Kolev                                        *
+ *   Copyright (C) 2009 by TJ Kolev                                        *
  *   tjkolev@yahoo.com                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -50,7 +50,7 @@ typedef vector<TagRec*>     tagtbl_t; // container of pointers
 taguid_t nextUid();
 
 
-class CmpLessTag //: binary_function<string, string, bool> 
+class CmpLessTag //: binary_function<string, string, bool>
 {
 public:
     bool operator()(const TagRec* tagL, const TagRec* tagR) const;
@@ -69,26 +69,26 @@ public:
 
     virtual void       addChildRefNdx(refndx_t);
     virtual void       addParentRefNdx(refndx_t);
-    
+
     refndx_t           getChildRefNdxAt(refndx_t& ndx) const;
 
     reftbl_t&          getChildRefTbl();
     const reftbl_t&    getChildRefTbl() const;
     reftbl_t&          getParentRefTbl();
     const reftbl_t&    getParentRefTbl() const;
-    
+
     void               setAsParent(TagTable& childTbl, refndx_t, bool clearChildRefs = true);
     void               setAsChild(TagTable& parentTbl, refndx_t);
 
     bool operator < (const TagRec&) const;
 
     virtual void       save(ostream&);
-    
+
     virtual void       print(ostream& output = cout) const;
 
 protected:
     void               compactChildRefs();
-    
+
     string      m_tag;
     taguid_t    m_uid;
 
@@ -113,7 +113,7 @@ public:
     void               sort();
     size_t             size() const;
     //tagtbl_t&          records();
-    
+
     TagRec*            getRecAt(refndx_t& ndx) const;
 
     TagRec*            reg(const string&, refndx_t&, bool& isReg);
@@ -123,19 +123,19 @@ public:
 
     virtual void       save(ostream&) const;
     virtual void       load(istream&);
-    
+
     virtual void       print(ostream& output = cout) const;
 
 protected:
     TagRec*            operator[](refndx_t) const;
-    
+
     refndx_t           lookUp(const string&);
     void               hash(const string&, refndx_t);
 
     tagtbl_t           m_tbl;
 
     lookup_t           m_refndxByTag;
-    
+
     CmpLessTag         m_comparator;
 };
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 by TJ Kolev                                        *
+ *   Copyright (C) 2009 by TJ Kolev                                        *
  *   tjkolev@yahoo.com                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -44,14 +44,14 @@ public:
 
     refndx_t    getAlbumTblNdx() const;
     void        setAlbumTblNdx(refndx_t);
-    
+
     const tracknum_t          m_trackNum;
     const taguid_t            m_artistUid;
     const taguid_t            m_genreUid;
     const string              m_file;
 
     virtual void       save(ostream&);
-    
+
     virtual void       print(ostream& output = cout) const;
 
 private:

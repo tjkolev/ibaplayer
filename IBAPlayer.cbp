@@ -11,6 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Option parameters="/home/tjkolev/Music/IBAPlayer.conf" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
@@ -40,6 +41,9 @@
 		<Linker>
 			<Add library="/usr/lib/libtag.so" />
 			<Add library="/usr/lib/libalsaplayer.so" />
+			<Add library="/usr/lib/librt.so" />
+			<Add library="/usr/lib/libpthread.so" />
+			<Add library="/usr/lib/libdl.so" />
 		</Linker>
 		<Unit filename="AlsaPlayerCntr.cpp" />
 		<Unit filename="AlsaPlayerCntr.h" />
@@ -54,6 +58,8 @@
 		<Unit filename="FileSys/general.h" />
 		<Unit filename="IBAConfig.cpp" />
 		<Unit filename="IBAConfig.h" />
+		<Unit filename="IBAList.cpp" />
+		<Unit filename="IBAList.h" />
 		<Unit filename="IBALogger.cpp" />
 		<Unit filename="IBALogger.h" />
 		<Unit filename="IBAPlayer.cpp" />
@@ -70,13 +76,8 @@
 		<Unit filename="MsgProcessor.cpp" />
 		<Unit filename="MusicLib/MusicLibDb.cpp" />
 		<Unit filename="MusicLib/MusicLibDb.h" />
-		<Unit filename="MusicLib/MusicLibio.cpp" />
 		<Unit filename="MusicLib/MusicLibrary.cpp" />
 		<Unit filename="MusicLib/MusicLibrary.h" />
-		<Unit filename="MusicLib/TagRec.cpp" />
-		<Unit filename="MusicLib/TagRec.h" />
-		<Unit filename="MusicLib/TrackRec.cpp" />
-		<Unit filename="MusicLib/TrackRec.h" />
 		<Unit filename="conplay.cpp" />
 		<Unit filename="sqlite3/sqlite3.c">
 			<Option compilerVar="CC" />
