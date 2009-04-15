@@ -40,17 +40,16 @@ MusicLibBrowser::MusicLibBrowser()
 
 void MusicLibBrowser::Init(AlsaPlayerCntr& ap)
 {
-	_cascadeLists[TOP_MENU_LIST][TOP_MENU_NDX_GENRE] = ListItem(TOP_MENU_NDX_GENRE + 1, "Genres");
-	_cascadeLists[TOP_MENU_LIST][TOP_MENU_NDX_ARTIST] = ListItem(2, "Artists");
-	_cascadeLists[TOP_MENU_LIST][TOP_MENU_NDX_ALBUM] = ListItem(3, "Albums");
-	_cascadeLists[TOP_MENU_LIST][TOP_MENU_NDX_PLIST] = ListItem(4, "Playlists");
-	_cascadeLists[TOP_MENU_LIST][TOP_MENU_NDX_PQUEUE] = ListItem(5, "Play Queue");
-	_cascadeLists[TOP_MENU_LIST][TOP_MENU_NDX_SHUFFLE] = ListItem(6, "Shuffle");
-	_cascadeLists[TOP_MENU_LIST][TOP_MENU_NDX_RNDPICK] = ListItem(7, "Random Pick 20");
-	_cascadeLists[TOP_MENU_LIST][TOP_MENU_NDX_REINDEX] = ListItem(8, "Reindex");
+	_cascadeLists[TOP_MENU_LIST].push_back(ListItem(1, "Genres"));
+	_cascadeLists[TOP_MENU_LIST].push_back(ListItem(2, "Artists"));
+	_cascadeLists[TOP_MENU_LIST].push_back(ListItem(3, "Albums"));
+	_cascadeLists[TOP_MENU_LIST].push_back(ListItem(4, "Playlists"));
+	_cascadeLists[TOP_MENU_LIST].push_back(ListItem(5, "Play Queue"));
+	_cascadeLists[TOP_MENU_LIST].push_back(ListItem(6, "Shuffle"));
+	_cascadeLists[TOP_MENU_LIST].push_back(ListItem(7, "Random Pick 20"));
+	_cascadeLists[TOP_MENU_LIST].push_back(ListItem(8, "Reindex"));
 
-	_cascadeNdx = TOP_MENU_LIST;
-	_cascadeLists[TOP_MENU_LIST].CurrentIndex = TOP_MENU_NDX_PQUEUE;
+	ResetMenus();
 
 	_musicDb.Open();
 
@@ -62,6 +61,19 @@ void MusicLibBrowser::Init(AlsaPlayerCntr& ap)
     }
 
     _pAp = &ap;
+    _pAp->Subscribe(this);
+}
+
+void MusicLibBrowser::ResetMenus()
+{
+	_cascadeNdx = TOP_MENU_LIST;
+	_cascadeLists[_cascadeNdx].CurrentIndex = TOP_MENU_NDX_PQUEUE;
+
+	for(int ndx = 1; ndx < CASCADE_LIST_COUNT; ndx++)
+	{
+		_cascadeLists[ndx].clear();
+		_cascadeLists[ndx].CurrentIndex = 0;
+	}
 }
 
 int MusicLibBrowser::TopMenuIndex()
@@ -72,7 +84,7 @@ int MusicLibBrowser::TopMenuIndex()
 CascadeList_t& MusicLibBrowser::CurrentCascadeList()
 {
 	if(_cascadeNdx == 1 && TOP_MENU_NDX_PQUEUE == TopMenuIndex())
-		return PlayQueue();
+		return PlayQueue(false);
 	else
 		return _cascadeLists[_cascadeNdx];
 }
@@ -138,10 +150,19 @@ const string& MusicLibBrowser::Menu()
 	return AtItem().Name;
 }
 
+
 CascadeList_t& MusicLibBrowser::PlayQueue(bool clear)
 {
 	if(clear)
+	{
 		_playQueue.clear();
+		_playQueue.CurrentIndex = 0;
+	}
+	return _playQueue;
+}
+
+const CascadeList_t& MusicLibBrowser::PlayQueue()
+{
 	return _playQueue;
 }
 
@@ -157,10 +178,11 @@ void MusicLibBrowser::AddTrack(ListItem& item)
 
 const string& MusicLibBrowser::Select(bool withPlay, bool withAdd)
 {
-	if(_cascadeNdx < 0)
+	if(_cascadeNdx < 0 || _cascadeNdx > 3)
 		_cascadeNdx = 0;
 
-	CascadeList_t& targetList = PlayQueue();
+	CascadeList_t& targetList = _cascadeLists[_cascadeNdx < 3 ? _cascadeNdx + 1 : _cascadeNdx];
+	bool cascadeNext = false;
 
 	//load next list from db depending on top menu and the cascade depth
 	switch(TopMenuIndex())
@@ -168,13 +190,8 @@ const string& MusicLibBrowser::Select(bool withPlay, bool withAdd)
 		case TOP_MENU_NDX_GENRE:
 			if(_cascadeNdx > 3)
 				_cascadeNdx = 0;
-
 			if(_cascadeNdx < 3)
-			{
-				targetList = _cascadeLists[_cascadeNdx + 1];
-				targetList.clear();
-			}
-
+				{targetList.clear(); cascadeNext = true;}
 			switch(_cascadeNdx)
 			{
 			case 0:
@@ -184,30 +201,23 @@ const string& MusicLibBrowser::Select(bool withPlay, bool withAdd)
 
 			case 1:
 				if(withPlay || withAdd)
-				{
 					_musicDb.LoadTracksByGenre(PlayQueue(withPlay), AtItem().Id);
-				}
 				else
-				{
 					_musicDb.LoadAlbumsByGenre(targetList, AtItem().Id);
-				}
 				break;
 
 			case 2:
 				if(withPlay || withAdd)
-					targetList = PlayQueue(withPlay);
-				_musicDb.LoadTracksByGenreAlbum(targetList,	PrevItem().Id, AtItem().Id);
+					_musicDb.LoadTracksByGenreAlbum(PlayQueue(withPlay), PrevItem().Id, AtItem().Id);
+				else
+					_musicDb.LoadTracksByGenreAlbum(targetList,	PrevItem().Id, AtItem().Id);
 				break;
 
 			case 3:
 				if(withAdd)
-				{
 					AddTrack(AtItem());
-				}
 				else
-				{
-					PlayTrack(AtItem());
-				}
+					{withPlay = true; PlayTrack(AtItem());}
 				break;
 			}
 
@@ -216,13 +226,8 @@ const string& MusicLibBrowser::Select(bool withPlay, bool withAdd)
 		case TOP_MENU_NDX_ARTIST:
 			if(_cascadeNdx > 3)
 				_cascadeNdx = 0;
-
 			if(_cascadeNdx < 3)
-			{
-				targetList = _cascadeLists[_cascadeNdx + 1];
-				targetList.clear();
-			}
-
+				{targetList.clear(); cascadeNext = true;}
 			switch(_cascadeNdx)
 			{
 			case 0:
@@ -232,26 +237,23 @@ const string& MusicLibBrowser::Select(bool withPlay, bool withAdd)
 
 			case 1:
 				if(withPlay || withAdd)
-				{
 					_musicDb.LoadTracksByArtist(PlayQueue(withPlay), AtItem().Id);
-				}
 				else
-				{
 					_musicDb.LoadAlbumsByArtist(targetList, AtItem().Id);
-				}
 				break;
 
 			case 2:
 				if(withPlay || withAdd)
-					targetList = PlayQueue(withPlay);
-				_musicDb.LoadTracksByAlbum(targetList, AtItem().Id);
+					_musicDb.LoadTracksByAlbum(PlayQueue(withPlay), AtItem().Id);
+				else
+					_musicDb.LoadTracksByAlbum(targetList, AtItem().Id);
 				break;
 
 			case 3:
 				if(withAdd)
 					AddTrack(AtItem());
 				else
-					PlayTrack(AtItem());
+					{withPlay = true; PlayTrack(AtItem());}
 				break;
 			}
 			break;
@@ -259,13 +261,8 @@ const string& MusicLibBrowser::Select(bool withPlay, bool withAdd)
 		case TOP_MENU_NDX_ALBUM:
 			if(_cascadeNdx > 2)
 				_cascadeNdx = 0;
-
 			if(_cascadeNdx < 2)
-			{
-				targetList = _cascadeLists[_cascadeNdx + 1];
-				targetList.clear();
-			}
-
+				{targetList.clear(); cascadeNext = true;}
 			switch(_cascadeNdx)
 			{
 			case 0:
@@ -275,15 +272,16 @@ const string& MusicLibBrowser::Select(bool withPlay, bool withAdd)
 
 			case 1:
 				if(withPlay || withAdd)
-					targetList = PlayQueue(withPlay);
-				_musicDb.LoadTracksByAlbum(targetList, AtItem().Id);
+					_musicDb.LoadTracksByAlbum(PlayQueue(withPlay), AtItem().Id);
+				else
+					_musicDb.LoadTracksByAlbum(targetList, AtItem().Id);
 				break;
 
 			case 2:
 				if(withAdd)
 					AddTrack(AtItem());
 				else
-					PlayTrack(AtItem());
+					{withPlay = true; PlayTrack(AtItem());}
 				break;
 			}
 			break;
@@ -291,13 +289,8 @@ const string& MusicLibBrowser::Select(bool withPlay, bool withAdd)
 		case TOP_MENU_NDX_PLIST:
 			if(_cascadeNdx > 2)
 				_cascadeNdx = 0;
-
 			if(_cascadeNdx < 2)
-			{
-				targetList = _cascadeLists[_cascadeNdx + 1];
-				targetList.clear();
-			}
-
+				{targetList.clear(); cascadeNext = true;}
 			switch(_cascadeNdx)
 			{
 			case 0:
@@ -307,15 +300,16 @@ const string& MusicLibBrowser::Select(bool withPlay, bool withAdd)
 
 			case 1:
 				if(withPlay || withAdd)
-					targetList = PlayQueue(withPlay);
-				_musicDb.LoadTracksByPlaylist(targetList, AtItem().Id);
+					_musicDb.LoadTracksByPlaylist(PlayQueue(withPlay), AtItem().Id);
+				else
+					_musicDb.LoadTracksByPlaylist(targetList, AtItem().Id);
 				break;
 
 			case 2:
 				if(withAdd)
 					AddTrack(AtItem());
 				else
-					PlayTrack(AtItem());
+					{withPlay = true; PlayTrack(AtItem());}
 				break;
 			}
 			break;
@@ -334,13 +328,15 @@ const string& MusicLibBrowser::Select(bool withPlay, bool withAdd)
 					if(ndx < 0)
 						ndx = 0;
 					_cascadeNdx++;
-					PlayQueue().CurrentIndex = ndx;
-					return AtItem().Name;
+					PlayQueue(false).CurrentIndex = ndx;
+					cascadeNext = true;
+					return PlayQueue(false).AtItem().Name;
 				}
 				break;
 			case 1:
 				withPlay = withAdd = false;
 				//TODO Move play pointer
+				_pAp->SetPosition(PlayQueue(false).AtItem().Path);
 				break;
 			}
 			break;
@@ -355,14 +351,15 @@ const string& MusicLibBrowser::Select(bool withPlay, bool withAdd)
 		case TOP_MENU_NDX_RNDPICK:
 			if(_cascadeNdx > 0)
 				_cascadeNdx = 0;
-			withPlay = !withAdd;
-			_musicDb.LoadTracksRandomPick(PlayQueue(withPlay), 20);
+			withPlay = withAdd = false;
+			RandomPick();
 			break;
 
 		case TOP_MENU_NDX_REINDEX:
 			if(_cascadeNdx > 0)
 				_cascadeNdx = 0;
-			_musicDb.Reindex();
+			withPlay = withAdd = false;
+			ReindexDb();
 			break;
 	}
 
@@ -373,26 +370,63 @@ const string& MusicLibBrowser::Select(bool withPlay, bool withAdd)
 	}
 	else
 	{
-		// move to next list
-		_cascadeNdx++;
-		CurrentCascadeList().CurrentIndex = 0;
+		if(cascadeNext)
+		{
+			// move to next list
+			_cascadeNdx++;
+			CurrentCascadeList().CurrentIndex = 0;
+		}
 	}
 	return AtItem().Name;
 }
 
-void MusicLibBrowser::RequeueTracks()
+void MusicLibBrowser::RequeueTracks(bool savePlayQueue)
 {
 	_pAp->stop();
 	_pAp->clear();
-	_pAp->add(PlayQueue(false));
+	_pAp->add(PlayQueue());
 	_pAp->play();
+	if(savePlayQueue)
+		SavePlayQueue();
+}
+
+void MusicLibBrowser::OnNewTrack()
+{
+	SavePlayQueuePosition();
 }
 
 void MusicLibBrowser::Shuffle()
 {
-	_pAp->stop();
-	_pAp->setShuffle(true);
-	_pAp->play();
+	CascadeList_t& pq = PlayQueue(false);
+	int listSize = pq.size();
+	if(listSize < 2)
+		return;
+
+	srand(time(NULL));
+	int prevPick = rand() % listSize;
+	ListItem tmpFirst = pq[prevPick];
+	for(int n = listSize * 2 - 1; n >= 0; n--)
+	{
+		int pick = rand() % listSize;
+		pq[prevPick] = pq[pick];
+		prevPick = pick;
+	}
+	pq[prevPick] = tmpFirst;
+
+	RequeueTracks();
+}
+
+void MusicLibBrowser::RandomPick()
+{
+	_musicDb.LoadTracksRandomPick(PlayQueue(true), 50);
+	Shuffle();
+}
+
+void MusicLibBrowser::ReindexDb()
+{
+	_musicDb.Reindex();
+	ResetMenus();
+	RandomPick();
 }
 
 const string& MusicLibBrowser::Play()
@@ -416,6 +450,40 @@ int MusicLibBrowser::GetPlayQueueNdx(string& trackPath)
 			return ndx;
 	}
 	return -1;
+}
+
+void MusicLibBrowser::SavePlayQueue()
+{
+	_musicDb.SavePlayQueue(PlayQueue());
+	SavePlayQueuePosition();
+}
+
+void MusicLibBrowser::LoadPlayQueue()
+{
+	_musicDb.LoadPlayQueue(PlayQueue(true));
+	if(PlayQueue().size() > 0)
+	{
+		int pos = _musicDb.LoadSetting("PlayQueuePosition", 0);
+		_pAp->stop();
+		_pAp->clear();
+		_pAp->add(PlayQueue());
+		_pAp->SetPosition(pos + 1);
+		_pAp->play();
+	}
+	else
+	{
+		RandomPick();
+	}
+}
+
+void MusicLibBrowser::SavePlayQueuePosition()
+{
+	int pos = _pAp->GetPosition() - 1; // it is 1 based
+	if(pos < 0)
+		pos = 0;
+	if(pos >= PlayQueue().size())
+		pos = 0;
+	_musicDb.SaveSetting("PlayQueuePosition", pos);
 }
 
 void MusicLibBrowser::logSelection()

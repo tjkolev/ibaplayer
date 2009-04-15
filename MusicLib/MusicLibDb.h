@@ -45,8 +45,8 @@ public:
 	void Close();
 	bool Reindex();
 
-	void SaveSetting(const string& name, const string& value);
-	string LoadSetting(const string& name, const string& defaultValue);
+	void SavePlayQueue(const CascadeList_t&);
+	void LoadPlayQueue(CascadeList_t&);
 
 	void LoadGenres(CascadeList_t& lst);
 	void LoadArtists(CascadeList_t& lst);
@@ -62,9 +62,17 @@ public:
 	void LoadTracksByPlaylist(CascadeList_t& lst, int playlistId);
 	void LoadTracksRandomPick(CascadeList_t& lst, int count);
 
+	int LoadTrackCount();
+
+	template <typename T>
+	T LoadSetting(const string& name, const T& defaultValue);
+
+	template <typename T>
+	void SaveSetting(const string& name, const T& value);
 
 private:
 	static const int	INVALID_SQL_ID = -1001;
+	static const int	PLAYQUEUE_PLAYLIST_ID = -1;
 	static string		TAG_UNKNOWN;
 
 	bool	Create();
@@ -77,7 +85,11 @@ private:
 	void	AddTrack(Tag*, const string& path);
 	int		AddPlaylist(const string& name, const string& path);
 	void	AddPlaylistTrack();
-	void	LoadList(CascadeList_t& lst, string& sql, int id1 = INVALID_SQL_ID, int id2 = INVALID_SQL_ID);
+	void	LoadList(CascadeList_t& lst, const string& sql, int id1 = INVALID_SQL_ID, int id2 = INVALID_SQL_ID);
+
+	void 	Save_Setting(const string& name, const string& value);
+	string 	Load_Setting(const string& name, const string& defaultValue);
+
 	string				_dbPath;
 	sqlite3*			_db;
 
@@ -102,5 +114,20 @@ private:
 	string				_lastPlaylistPath;
 	int					_lastPlaylistId;
 };
+
+template <typename T>
+T MusicLibDb::LoadSetting(const string& name, const T& defaultValue)
+{
+	string defval = ConfigFile::T_as_string<T>(defaultValue);
+	string val = Load_Setting(name, defval);
+	return ConfigFile::string_as_T<T>(val);
+}
+
+template <typename T>
+void MusicLibDb::SaveSetting(const string& name, const T& value)
+{
+	string val = ConfigFile::T_as_string<T>(value);
+	Save_Setting(name, val);
+}
 
 #endif

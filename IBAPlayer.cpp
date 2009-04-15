@@ -31,7 +31,7 @@ IBAPlayer::~IBAPlayer()
 {
 }
 
-bool IBAPlayer::initPlayer()
+bool IBAPlayer::Init()
 {
     return m_ap.init();
 }
@@ -84,7 +84,7 @@ int IBAPlayer::run()
 //    m_mlibMngr.getLibrary().load();
 //    m_mlibMngr.getBrowser().init();
 
-    if(!initPlayer())
+    if(!Init())
         return 2;
 
     m_timers.init();
@@ -124,7 +124,7 @@ byte* strTohex(char* str, int len, byte* buff)
     return buff;
 }
 
-void PrintList(CascadeList_t& lst)
+void PrintList(const CascadeList_t& lst)
 {
 	cout << "List:" << endl;
 	for(CascadeList_t::const_iterator it = lst.begin();	it != lst.end(); it++)
@@ -150,6 +150,9 @@ int main(int argc, char* argv[])
 	int sl = GetConfigValue<int>(PRMS_SVR_LEVEL);
 	IBALogger::Logger().setLogLevel(sl);
 
+/* testing code */
+if(false)
+{
 	MusicLibDb musicDb;
 	musicDb.Open();
 	CascadeList_t lst;
@@ -166,9 +169,16 @@ int main(int argc, char* argv[])
 	PrintList(lst);
 	musicDb.Close();
 	return 0;
-	/*
-    IBAPlayer player;
+}
+/* end testing code */
 
+
+    IBAPlayer player;
+	if(!player.Init())
+		return 1;
+	consolePlay(&player);
+	return 0;
+/*
     if(argc > 2)    // existance of second - reindex
     {
         if(0 == strcmp(argv[2], "reindex"))
@@ -184,9 +194,9 @@ int main(int argc, char* argv[])
         else
             return 1;
     }
-
-    return player.run();
 */
+//    return player.run();
+
 /*    IBusCntr ibus;
     if(!ibus.init(player.getConfig(), player.getLog()))
         return 2;*/

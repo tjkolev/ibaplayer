@@ -17,13 +17,18 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include <tag.h>
+#include "fileref.h"
 
 #include "IBALogger.h"
 #include "IBAConfig.h"
 #include "AlsaPlayerCntr.h"
 
+using namespace TagLib;
+
 AlsaPlayerCntr::AlsaPlayerCntr()
 {
+	m_pSubscriber = NULL;
     m_playlistPosition = -1;
     strcpy(m_tagSeparator, " * ");
     m_miscInfo[m_maxMiscInfoLen] = 0;
@@ -75,22 +80,25 @@ bool AlsaPlayerCntr::startAp()
         return true;
     }
 
-/*    ostringstream apCmnd;
-    apCmnd << "alsaplayer -q -i daemon -s " << m_apName << " &\n";
-    cout << "Starting alsaplayer with:" << endl << apCmnd.str() << endl;
-    int exitcode = system(apCmnd.str().c_str());
+    string apCmnd("alsaplayer -i daemon -s " + m_apName + "&");
+    int exitcode = system(apCmnd.c_str());
     if(0 != exitcode)
         return false;
 
     int count = 4;
     while(count--)
     {
-        sleep(5);
+        sleep(2);
         if(isApRunning())
             return true;
-    }*/
+    }
 
     return false;
+}
+
+void AlsaPlayerCntr::Subscribe(AlsaSubscriber* pSub)
+{
+	m_pSubscriber = pSub;
 }
 
 void AlsaPlayerCntr::stopAp()
@@ -127,11 +135,12 @@ void AlsaPlayerCntr::previous()
     ap_prev(m_apSession);
 }
 
-
+/*
 void AlsaPlayerCntr::setShuffle(bool isOn)
 {
     ap_shuffle_playlist(m_apSession);
 }
+*/
 
 void AlsaPlayerCntr::setLoop(bool isOn)
 {
@@ -148,65 +157,110 @@ void AlsaPlayerCntr::add(const CascadeList_t& plist)
     for(CascadeList_t::const_iterator it = plist.begin();
         it != plist.end();
         it++)
-        ap_add_path(m_apSession, (*it).Name.c_str());
+        ap_add_path(m_apSession, (*it).Path.c_str());
+
+	// stupid tricks to get rid of the currently buffered track
+	// in case this is a clean add, not append.
+	int trackCount = 0;
+	ap_get_playlist_length(m_apSession, &trackCount);
+	if(trackCount <= plist.size())
+		next();
+}
+
+void AlsaPlayerCntr::SetPosition(const string& trackPath)
+{
+	int plLen = 0;
+	ap_get_playlist_length(m_apSession, &plLen);
+	if(plLen < 2)
+		return;
+	char path[AP_FILE_PATH_MAX];
+	for(int n = 1; n <= plLen; n++)
+	{
+		ap_get_file_path_for_track(m_apSession, path, n);
+		if(0 == trackPath.compare(path))
+		{
+			SetPosition(n);
+			return;
+		}
+	}
+}
+
+void AlsaPlayerCntr::SetPosition(int pos)
+{
+	ap_set_current(m_apSession, pos - 1);
+	next();
+}
+
+int AlsaPlayerCntr::GetPosition()
+{
+	int pos = 0;
+	ap_get_playlist_position(m_apSession, &pos);
+	return pos;
 }
 
 void AlsaPlayerCntr::clear()
 {
     stop();
     ap_clear_playlist(m_apSession);
+    m_info[0] = 0;
+    m_playlistPosition = -1;
 }
 
 
 char* AlsaPlayerCntr::getTrack()
 {
-    ap_get_track_number(m_apSession, m_track);
+	fillInfo();
     return m_track;
 }
 
 char* AlsaPlayerCntr::getTitle()
 {
-    ap_get_title(m_apSession, m_title);
+	fillInfo();
     return m_title;
 }
 
 char* AlsaPlayerCntr::getArtist()
 {
-    ap_get_artist(m_apSession, m_artist);
+	fillInfo();
     return m_artist;
 }
 
 char* AlsaPlayerCntr::getAlbum()
 {
-    ap_get_album(m_apSession, m_album);
+	fillInfo();
     return m_album;
 }
 
+/*
 char* AlsaPlayerCntr::getGenre()
-{
-    ap_get_genre(m_apSession, m_genre);
-    return m_genre;
-}
-
-char* AlsaPlayerCntr::getInfo()
 {
     if(!isPlaying())
         return NULL;
-    if(!isOnSameTrack())
-        formatInfo();
+    ap_get_genre(m_apSession, m_genre);
+    return m_genre;
+}
+*/
+
+char* AlsaPlayerCntr::getInfo()
+{
+	fillInfo();
     return m_info;
 }
 
 
 int AlsaPlayerCntr::getLength()
 {
+    if(!isPlaying())
+        return 0;
     int len;
     ap_get_length(m_apSession, &len);
     return len;
 }
 
-int AlsaPlayerCntr::getPosition()
+int AlsaPlayerCntr::getTimePosition()
 {
+    if(!isPlaying())
+        return 0;
     int pos;
     ap_get_position(m_apSession, &pos);
     return pos;
@@ -216,47 +270,84 @@ char* AlsaPlayerCntr::getTimeInfo()
 {
     if(!isPlaying())
         return NULL;
-
     formatTimeInfo();
     return m_timeInfo;
 }
 
 char* AlsaPlayerCntr::getFilePath()
 {
-	ap_get_file_path(m_apSession, m_path);
+	fillInfo();
 	return m_path;
 }
 
 char* AlsaPlayerCntr::getFileName()
 {
-    getFilePath();
+	fillInfo();
     char* lastCh = strrchr(m_path, '/');
     if(lastCh)
-        strcpy(m_path, lastCh + 1);
+		return lastCh + 1;
 
     return m_path;
 }
 
-void AlsaPlayerCntr::formatInfo()
+char* AlsaPlayerCntr::getInfoFromFile()
 {
-    m_info[0] = 0;
-    getTrack();
-    if(m_track[0])
+	if(NULL == m_path || m_path[0] == 0) //this should never happen
+		return NULL;
+	FileRef mfile(m_path);
+	Tag* mtag = mfile.tag();
+	if(NULL == mtag)
+		return NULL;
+	sprintf(m_track, "%d", mtag->track());
+//	string tag = mtag->genre().to8Bit();
+//	sprintf(m_genre, "%s", tag.substr(0, AP_GENRE_MAX-1).c_str());
+	string tag = mtag->artist().to8Bit();
+	sprintf(m_artist, "%s", tag.substr(0, AP_ARTIST_MAX-1).c_str());
+	tag = mtag->album().to8Bit();
+	sprintf(m_album, "%s", tag.substr(0, AP_ALBUM_MAX-1).c_str());
+	tag = mtag->title().to8Bit();
+	sprintf(m_title, "%s", tag.substr(0, AP_TITLE_MAX-1).c_str());
+	return m_title;
+}
+
+char* AlsaPlayerCntr::getInfoFromPlayer()
+{
+	ap_get_file_path(m_apSession, m_path); //this better work every time
+
+    ap_get_track_number(m_apSession, m_track);
+    ap_get_artist(m_apSession, m_artist);
+    ap_get_album(m_apSession, m_album);
+    ap_get_title(m_apSession, m_title);
+    if(NULL == m_title || m_title[0] == 0)
+		return NULL;
+	return m_title;
+}
+
+
+void AlsaPlayerCntr::fillInfo()
+{
+    if(!isPlaying())
     {
-        strcat(m_info, m_track);
-        strcat(m_info, m_tagSeparator);
-        strcat(m_info, getTitle());
-        strcat(m_info, m_tagSeparator);
-        strcat(m_info, getAlbum());
-        strcat(m_info, m_tagSeparator);
-        strcat(m_info, getArtist());
-        strcat(m_info, m_tagSeparator);
+		m_info[0] = 0;
+        return;
     }
-    else
-    {
-        // use the file name, get rid of the full path, and extension
-        getFileName();
-    }
+
+	if(isOnSameTrack())
+		return;
+
+	if(NULL != m_pSubscriber)
+		m_pSubscriber->OnNewTrack();
+
+	m_info[0] = 0;
+    if(NULL == getInfoFromPlayer())
+		if(NULL == getInfoFromFile())
+			{
+				strcpy(m_info, getFileName());
+				return;
+			}
+
+	sprintf(m_info, "%s%s%s%s%s%s%s%s",
+					m_track, m_tagSeparator, m_title, m_tagSeparator, m_album, m_tagSeparator, m_artist, m_tagSeparator);
 }
 
 
@@ -278,7 +369,7 @@ bool AlsaPlayerCntr::isOnSameTrack()
 
 void AlsaPlayerCntr::formatTimeInfo()
 {
-    int pos = getPosition();
+    int pos = getTimePosition();
     int minutesPos = pos / 60;
     int secondsPos = pos % 60;
 
@@ -287,12 +378,14 @@ void AlsaPlayerCntr::formatTimeInfo()
     int secondsLen = len % 60;
 
     sprintf(m_timeInfo,
-            "%2.2u:%02.2u/%2.2u:%02.2u",
+            "%2.2u:%2.2u/%2.2u:%2.2u",
             minutesPos, secondsPos, minutesLen, secondsLen);
 }
 
 char* AlsaPlayerCntr::getMiscInfo()
 {
+    if(!isPlaying())
+        return NULL;
     // track_in_playlist/total_tracks kbps time
     // 1/52 192kbit    5:45
 

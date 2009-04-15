@@ -18,37 +18,29 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include "IBAList.h"
 
-#ifndef IBALIST_H_INCLUDED
-#define IBALIST_H_INCLUDED
-
-#include <string>
-#include <vector>
-
-using namespace std;
-
-class ListItem
+ListItem::ListItem(int id, string& name)
 {
-public:
-	ListItem(int id, string& name);
-	ListItem(int id, char* name);
+	Id = id;
+	Name = name;
+}
 
-	int		Id;
-	string	Name;
-	string	Path;
-};
-
-//typedef vector<ListItem> CascadeList_t;
-class CascadeList_t : public vector<ListItem>
+ListItem::ListItem(int id, char* name)
 {
-public:
-	int			CurrentIndex;
+	Id = id;
+	Name = name;
+}
 
-	ListItem&	AtItem();
+ListItem CascadeList_t::EMPTY(0, "[Empty]");
 
-private:
-	static ListItem		EMPTY;
-};
-
-
-#endif // IBALIST_H_INCLUDED
+ListItem& CascadeList_t::AtItem()
+{
+	if(size() < 1)
+		return EMPTY;
+	if(CurrentIndex < 0)
+		CurrentIndex = 0;
+	else if (CurrentIndex >= size())
+		CurrentIndex = size() - 1;
+	return at(CurrentIndex);
+}

@@ -77,8 +77,10 @@ bool MusicLibDb::Create()
 	"CREATE TABLE Artist (Id INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, CONSTRAINT Udx_Artist_Name UNIQUE (Name) ON CONFLICT IGNORE);"
 	"CREATE TABLE Genre (Id INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, CONSTRAINT Udx_Genre_Name UNIQUE (Name) ON CONFLICT IGNORE);"
 	"CREATE TABLE Playlist (Id INTEGER PRIMARY KEY, Name TEXT, Path TEXT, CONSTRAINT Udx_Playlist_Path UNIQUE (Path) ON CONFLICT IGNORE);"
-	"CREATE TABLE PlaylistTrack (PlaylistId INTEGER, TrackId INTEGER);"
-	"CREATE TABLE Setting (Name TEXT PRIMARY KEY ON CONFLICT REPLACE, Value TEXT);";
+	"CREATE TABLE PlaylistTrack (PlaylistId INTEGER, Number INTEGER, TrackId INTEGER);"
+	"CREATE TABLE Setting (Name TEXT PRIMARY KEY ON CONFLICT REPLACE, Value TEXT);"
+	"INSERT INTO Playlist(Id, Name, Path) VALUES(-1, 'PlayQueue', '.');";
+
 	rc = sqlite3_exec(_db, sqlCreateTables.c_str(), NULL, NULL, &errmsg);
 	if(rc)
 	{
@@ -335,7 +337,7 @@ void MusicLibDb::AddPlaylistTrack()
 
 const string SQL_Save_Setting = "INSERT INTO Setting(Name,Value) VALUES(?001,?002);";
 const string SQL_Load_Setting = "SELECT Value FROM Setting WHERE Name = ?001;";
-void MusicLibDb::SaveSetting(const string& name, const string& value)
+void MusicLibDb::Save_Setting(const string& name, const string& value)
 {
 	sqlite3_stmt* psql;
 	const char* tail;
@@ -346,10 +348,11 @@ void MusicLibDb::SaveSetting(const string& name, const string& value)
 	rc = sqlite3_finalize(psql);
 }
 
-string MusicLibDb::LoadSetting(const string& name, const string& defaultValue)
+string MusicLibDb::Load_Setting(const string& name, const string& defaultValue)
 {
 	sqlite3_stmt* psql;
 	const char* tail;
+	string value = defaultValue;
 	int rc = sqlite3_prepare_v2(_db, SQL_Load_Setting.c_str(), -1, &psql, &tail);
 	rc = sqlite3_bind_text(psql, 1, name.c_str(), -1, SQLITE_STATIC);
 	rc = sqlite3_step(psql);
@@ -357,12 +360,10 @@ string MusicLibDb::LoadSetting(const string& name, const string& defaultValue)
 	{
 		const char* sqlTxt = (const char*) sqlite3_column_text(psql, 0);
 		//int bytes = sqlite3_column_bytes(psql, 0);
-		return string(sqlTxt);
+		value = sqlTxt;
 	}
-	else
-	{
-		return string(defaultValue);
-	}
+	rc = sqlite3_finalize(psql);
+	return value;
 }
 
 void MusicLibDb::PrepareAddStatements()
@@ -398,7 +399,7 @@ void MusicLibDb::DisposeAddStatements()
 
 string MusicLibDb::TAG_UNKNOWN("Unknown");
 
-void MusicLibDb::LoadList(CascadeList_t& lst, string& sql, int id1, int id2)
+void MusicLibDb::LoadList(CascadeList_t& lst, const string& sql, int id1, int id2)
 {
 	const char* tail;
 	sqlite3_stmt* pStmt;
@@ -417,80 +418,144 @@ void MusicLibDb::LoadList(CascadeList_t& lst, string& sql, int id1, int id2)
 		//int bytes = sqlite3_column_bytes(pStmt, 1);
 		string name(sqlTxt);
 		ListItem item(itemId, name.length() < 1 ? TAG_UNKNOWN : name);
+		if(sqlite3_column_count(pStmt) >= 3)
+		{
+			sqlTxt = (const char*) sqlite3_column_text(pStmt, 2);
+			string path(sqlTxt);
+			if(name.length() > 0)
+				item.Path = path;
+		}
 		lst.push_back(item);
 	}
 
 	rc = sqlite3_finalize(pStmt);
 }
 
+int MusicLibDb::LoadTrackCount()
+{
+	string sql = "select count(*) from Track;";
+	const char* tail;
+	sqlite3_stmt* pStmt;
+	int count = 0;
+	int rc = sqlite3_prepare_v2(_db, sql.c_str(), -1, &pStmt, &tail);
+	if(SQLITE_ROW == (rc = sqlite3_step(pStmt)))
+	{
+		count = sqlite3_column_int64(pStmt, 0);
+	}
+	rc = sqlite3_finalize(pStmt);
+	return count;
+}
+
+void MusicLibDb::SavePlayQueue(const CascadeList_t& playQueue)
+{
+	int listCount = playQueue.size();
+	if(listCount < 1)
+		return;
+	char* errmsg;
+	string sql = "delete from PlaylistTrack where PlaylistId = -1;";
+	int rc = sqlite3_exec(_db, sql.c_str(), NULL, NULL, &errmsg);
+	sqlite3_free(errmsg);
+
+	const char* tail;
+	sqlite3_stmt* pStmt;
+	sql = "insert into PlaylistTrack(PlaylistId, Number, TrackId) values(-1, ?001, ?002);";
+	rc = sqlite3_prepare_v2(_db, sql.c_str(), -1, &pStmt, &tail);
+	for(int n = 0; n < listCount; n++)
+	{
+		const ListItem& item = playQueue[n];
+		rc = sqlite3_bind_int(pStmt, 1, n);
+		rc = sqlite3_bind_int(pStmt, 2, item.Id);
+		rc = sqlite3_step(pStmt);
+		rc = sqlite3_reset(pStmt);
+	}
+	rc = sqlite3_finalize(pStmt);
+}
+
+void MusicLibDb::LoadPlayQueue(CascadeList_t& playQueue)
+{
+	LoadTracksByPlaylist(playQueue, PLAYQUEUE_PLAYLIST_ID);
+}
+
 void MusicLibDb::LoadGenres(CascadeList_t& lst)
 {
-	string sql("select Id, Name from Genre;");
+	string sql("select Id, Name from Genre order by Name;");
 	LoadList(lst, sql);
 }
 
 void MusicLibDb::LoadArtists(CascadeList_t& lst)
 {
-	string sql("select Id, Name from Artist;");
+	string sql("select Id, Name from Artist order by Name;");
 	LoadList(lst, sql);
 }
 
 void MusicLibDb::LoadAlbums(CascadeList_t& lst)
 {
-	string sql("select Id, Title from Album;");
+	string sql("select Id, Title from Album order by Title;");
 	LoadList(lst, sql);
 }
 
 void MusicLibDb::LoadPlaylists(CascadeList_t& lst)
 {
-	string sql("select Id, Name from Playlist;");
+	string sql("select Id, Name from Playlist order by Name;");
 	LoadList(lst, sql);
 }
 
 void MusicLibDb::LoadAlbumsByGenre(CascadeList_t& lst, int genreId)
 {
-	string sql("select distinct a.Id, a.Title from Album a inner join Track t on a.Id = t.AlbumId where t.GenreId = ?001;");
+	string sql("select distinct a.Id, a.Title from Album a inner join Track t on a.Id = t.AlbumId where t.GenreId = ?001 order by a.Title;");
 	LoadList(lst, sql, genreId);
 }
 
 void MusicLibDb::LoadAlbumsByArtist(CascadeList_t& lst, int artistId)
 {
-	string sql("select distinct a.Id, a.Title from Album a inner join Track t on a.Id = t.AlbumId where t.ArtistId = ?001;");
+	string sql("select distinct a.Id, a.Title from Album a inner join Track t on a.Id = t.AlbumId where t.ArtistId = ?001 order by a.Title;");
 	LoadList(lst, sql, artistId);
 }
 
 void MusicLibDb::LoadTracksByGenre(CascadeList_t& lst, int genreId)
 {
-	string sql("select Id, Title, Path from Track where GenreId = ?001;");
+	string sql("select Id, Title, Path from Track where GenreId = ?001 order by Number;");
 	LoadList(lst, sql, genreId);
 }
 
 void MusicLibDb::LoadTracksByArtist(CascadeList_t& lst, int artistId)
 {
-	string sql("select Id, Title, Path from Track where ArtistId = ?001;");
+	string sql("select Id, Title, Path from Track where ArtistId = ?001 order by Number;");
 	LoadList(lst, sql, artistId);
 }
 
 void MusicLibDb::LoadTracksByGenreAlbum(CascadeList_t& lst, int genreId, int albumId)
 {
-	string sql("select Id, Title, Path from Track where GenreId = ?001 and AlbumId = ?002;");
+	string sql("select Id, Title, Path from Track where GenreId = ?001 and AlbumId = ?002 order by Number;");
 	LoadList(lst, sql, genreId, albumId);
 }
 
 void MusicLibDb::LoadTracksByAlbum(CascadeList_t& lst, int albumId)
 {
-	string sql("select Id, Title, Path from Track where AlbumId = ?001;");
+	string sql("select Id, Title, Path from Track where AlbumId = ?001 order by Number;");
 	LoadList(lst, sql, albumId);
 }
 
 void MusicLibDb::LoadTracksByPlaylist(CascadeList_t& lst, int playlistId)
 {
-	string sql("select t.Id, t.Title, t.Path from Track t inner join Playlist p on t.Id = p.TrackId where p.Id = ?001;");
+	string sql("select t.Id, t.Title, t.Path from Track t inner join PlaylistTrack p on t.Id = p.TrackId where p.PlaylistId = ?001 order by p.Number;");
 	LoadList(lst, sql, playlistId);
 }
 
 void MusicLibDb::LoadTracksRandomPick(CascadeList_t& lst, int count)
 {
-	string sql("");
-	LoadList(lst, sql);
+	int trackCount = LoadTrackCount();
+	if(trackCount < 1)
+		return;
+	// generate random track ids
+	ostringstream sql;
+	sql << "select Id, Title, Path from Track where Id in (";
+	srand(time(NULL));
+	for(int n = 0; n < count; n++)
+	{
+		int trackId = rand() % trackCount + 1;
+		sql << (n > 0 ? "," : "") << trackId;
+	}
+	sql << ");";
+	LoadList(lst, sql.str());
 }

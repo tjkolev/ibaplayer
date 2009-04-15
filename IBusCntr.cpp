@@ -281,6 +281,19 @@ void IBusCntr::pfmt(ostream& out, const byte* p)
     out << "]-" << endl;
 }
 
+static const char* IBUS_DEVT_BROADCAST        = "Broadcast";
+static const char* IBUS_DEVT_BROADCASTX       = "BroadcastX";
+static const char* IBUS_DEVT_CD_CHANGER       = "CD Changer";
+static const char* IBUS_DEVT_WHEEL            = "Wheel";
+static const char* IBUS_DEVT_RADIO            = "Radio";
+static const char* IBUS_DEVT_IKE              = "IKE";
+static const char* IBUS_DEVT_MID              = "MID";
+static const char* IBUS_DEVT_LCM              = "Lights Control";
+static const char* IBUS_DEVT_OBC              = "OBC";
+static const char* IBUS_DEVT_LIGHTS           = "Lights and Seats";
+static const char* IBUS_DEVT_BMB              = "BMB";
+static const char* IBUS_DEVT_UNKNOWN          = "Unknown";
+
 const char* IBusCntr::getDevTxt(byte d)
 {
     switch(d)

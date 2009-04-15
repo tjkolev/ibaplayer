@@ -27,7 +27,7 @@
 
 #define CASCADE_LIST_COUNT	4
 
-class MusicLibBrowser
+class MusicLibBrowser : public AlsaSubscriber
 {
 public:
     MusicLibBrowser();
@@ -43,6 +43,14 @@ public:
     const string&       PgUp();
 	const string&		Play();
 	const string&		Add();
+	void				RandomPick();
+	void				ReindexDb();
+	void				Shuffle();
+	const CascadeList_t&	PlayQueue();
+	void				SavePlayQueue();
+	void				SavePlayQueuePosition();
+	void				LoadPlayQueue();
+	void				OnNewTrack();
 
 private:
 
@@ -50,24 +58,21 @@ private:
 	AlsaPlayerCntr*	_pAp;
 
 	CascadeList_t	_cascadeLists[CASCADE_LIST_COUNT];
-	//int				_cascadeListNdx[CASCADE_LIST_COUNT];
 	int				_cascadeNdx;
 
 	CascadeList_t	_playQueue;
-	//int				_playQueueNdx;
 
 	float			_pagingSize;
 
 	CascadeList_t&		CurrentCascadeList();
 	int					TopMenuIndex();
+	void				ResetMenus();
 	ListItem& 			AtItem();
 	ListItem&			PrevItem();
-	//ListItem& 			Item(int lstNdx, int itemNdx);
-	CascadeList_t&		PlayQueue(bool clear = false);
+	CascadeList_t&		PlayQueue(bool clear);
 	void				AddTrack(ListItem&);
 	void				PlayTrack(ListItem&);
-	void				RequeueTracks();
-	void				Shuffle();
+	void				RequeueTracks(bool savePlayQueue = true);
 	int					GetPlayQueueNdx(string& trackPath);
 	const string&		GoOffset(int);
 	int					ListPageSize();

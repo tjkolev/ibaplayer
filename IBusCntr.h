@@ -42,20 +42,6 @@
 
 #define IBUS_POLL_WATCH_TIMEOUT     45     //seconds
 
-static const char* IBUS_DEVT_BROADCAST        = "Broadcast";
-static const char* IBUS_DEVT_BROADCASTX       = "BroadcastX";
-static const char* IBUS_DEVT_CD_CHANGER       = "CD Changer";
-static const char* IBUS_DEVT_WHEEL            = "Wheel";
-static const char* IBUS_DEVT_RADIO            = "Radio";
-static const char* IBUS_DEVT_IKE              = "IKE";
-static const char* IBUS_DEVT_MID              = "MID";
-static const char* IBUS_DEVT_LCM              = "Lights Control";
-static const char* IBUS_DEVT_OBC              = "OBC";
-static const char* IBUS_DEVT_LIGHTS           = "Lights and Seats";
-static const char* IBUS_DEVT_BMB              = "BMB";
-static const char* IBUS_DEVT_UNKNOWN          = "Unknown";
-
-
 static const byte IBUS_ALL_DEV[]    = {IBUS_DEV_CD_CHANGER,IBUS_DEV_WHEEL,IBUS_DEV_RADIO,IBUS_DEV_IKE,IBUS_DEV_LCM,
                                        IBUS_DEV_MID,IBUS_DEV_OBC,IBUS_DEV_LIGHTS,IBUS_DEV_BMB,
                                        IBUS_DEV_BROADCAST,IBUS_DEV_BROADCASTX};

@@ -22,7 +22,13 @@
 #define _ALSA_PLAYER_CNTR_H_
 
 #include "control.h"
-#include "MusicLibrary.h"
+#include "IBAList.h"
+
+class AlsaSubscriber
+{
+public:
+	virtual void OnNewTrack() = 0;
+};
 
 class AlsaPlayerCntr
 {
@@ -31,7 +37,9 @@ public:
     ~AlsaPlayerCntr();
 
     bool init();
+    void Subscribe(AlsaSubscriber*);
 
+    bool isApRunning();
     bool isPlaying();
 
     void play();
@@ -45,31 +53,37 @@ public:
 
     void add(const CascadeList_t&);
     void add(const char*);
+    int  GetPosition();
+	void SetPosition(const string& trackPath);
+	void SetPosition(int pos);
     void clear();
 
     char* getTrack();
     char* getTitle();
     char* getArtist();
     char* getAlbum();
-    char* getGenre();
+    //char* getGenre();
     char* getFileName();
     char* getFilePath();
     char* getInfo();
 
     int   getLength();
-    int   getPosition();
+    int   getTimePosition();
     char* getTimeInfo();
     char* getMiscInfo();
 
 private:
-    bool    isApRunning();
     bool    startAp();
     void    stopAp();
 
+	AlsaSubscriber*	m_pSubscriber;
+
     bool    isOnSameTrack();
 
-    void    formatInfo();
+    void    fillInfo();
     void    formatTimeInfo();
+    char*	getInfoFromPlayer();
+    char*	getInfoFromFile();
 
     int               m_apSession;
     string            m_apName;
@@ -81,12 +95,12 @@ private:
     char    m_title[AP_TITLE_MAX];
     char    m_album[AP_ALBUM_MAX];
     char    m_artist[AP_ARTIST_MAX];
-    char    m_genre[AP_GENRE_MAX];
+    //char    m_genre[AP_GENRE_MAX];
     static const int m_maxInfoLen = AP_TRACK_NUMBER_MAX +
                                     AP_TITLE_MAX +
                                     AP_ALBUM_MAX +
                                     AP_ARTIST_MAX +
-                                    AP_GENRE_MAX +
+                                    //AP_GENRE_MAX +
                                     16;
     char    m_info[m_maxInfoLen + 1];
 

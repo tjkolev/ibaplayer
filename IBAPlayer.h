@@ -30,6 +30,8 @@
 
 using namespace std;
 
+void PrintList(const CascadeList_t&);
+
 class IBAPlayer;
 
 class MsgProcessor : public IBATimerListener
@@ -105,7 +107,7 @@ public:
 	IBAPlayer();
 	virtual ~IBAPlayer();
 
-    //MusicLibMngr&   getLibMngr();
+    bool			Init();
     AlsaPlayerCntr& getPlayer();
     IBusCntr&       getIBusCntr();
     IBATimers&      getTimers();
@@ -115,12 +117,9 @@ public:
 
 private:
 
-    bool             initPlayer();
-
     void             play();
 
     AlsaPlayerCntr   m_ap;
-    //MusicLibMngr&    m_mlibMngr;
     IBusCntr         m_ibus;
     MsgProcessor     m_msgProc;
     IBATimers        m_timers;

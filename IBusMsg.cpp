@@ -32,6 +32,7 @@ IBusMsg* IBusMsgQueue::fillMsg(IBusMsg* msg, byte from, byte to, const byte* d, 
     msg->devTo   = to;
     memcpy(msg->data, d, l);
     msg->len     = l;
+    return msg;
 }
 
 // the single message queue
