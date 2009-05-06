@@ -53,14 +53,17 @@ char IBALogger::getSvrLevelChar(Severity svr)
     }
 }
 
-int IBALogger::getLogLevel()
+IBALogger::Severity IBALogger::getLogLevel()
 {
     return m_svrLevel;
 }
 
-void IBALogger::setLogLevel(int severityLevel)
+void IBALogger::setLogLevel(Severity severityLevel)
 {
-    m_svrLevel = severityLevel & (LOGS_CRASH + LOGS_ERROR + LOGS_WARNING + LOGS_INFO + LOGS_DEBUG);
+	string msg("Severity level set to ");
+	msg += getSvrLevelChar(severityLevel);
+	Log(msg, LOGS_DEBUG);
+    m_svrLevel = severityLevel;
 }
 
 void IBALogger::setLogOutput(Output out, const string& fileName)
@@ -95,6 +98,8 @@ void IBALogger::setLogOutput(Output out, const string& fileName)
             break;
         }
     }
+
+	LogMessage(""); //separator
 }
 
 void IBALogger::log(const char* log_msg, Severity sev)
@@ -102,9 +107,15 @@ void IBALogger::log(const char* log_msg, Severity sev)
     if(NULL == m_out || NULL == log_msg)
         return;
 
-    if(!(sev & m_svrLevel))
-        return;
+    if(sev <= LOGS_NONE || sev < m_svrLevel)
+		return;
 
+	LogMessage(log_msg, sev);
+}
+
+// logs the message regardless of set severity level
+void IBALogger::LogMessage(const char* log_msg, Severity sev)
+{
     time_t now;
     time(&now);
     struct tm tmResult;

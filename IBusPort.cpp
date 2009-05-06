@@ -42,6 +42,8 @@ IBusPort::~IBusPort()
 
 bool IBusPort::init()
 {
+	Log("Initializing ibus port.", IBALogger::LOGS_DEBUG);
+
     m_devPort = GetConfigValue<string>(PRMS_IBUS_PORT);
     m_monitorOnly = GetConfigValue<bool>(PRMS_IBUS_MONITOR_MODE);
     if(m_monitorOnly)
@@ -52,6 +54,7 @@ bool IBusPort::init()
 
 void IBusPort::regListener(IBusPortListener& listener)
 {
+	Log("Registering ibus port listener.", IBALogger::LOGS_DEBUG);
     m_portListener = &listener;
 }
 
@@ -80,10 +83,12 @@ bool IBusPort::openPort()
 {
     closePort();
 
+	Log("Opening port " + m_devPort, IBALogger::LOGS_DEBUG);
     m_fd = open(m_devPort.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
     if(m_fd < 0)
     {
         perror(m_devPort.c_str());
+        Log("Failed to open port.", IBALogger::LOGS_DEBUG);
         return false;
     }
 
@@ -127,18 +132,23 @@ bool IBusPort::openPort()
     tcflush(m_fd, TCIFLUSH);
     tcsetattr(m_fd, TCSANOW, &term_options);
 
+	Log("Ibus port opened.", IBALogger::LOGS_DEBUG);
     return true;
 }
 
 void IBusPort::closePort()
 {
     if(m_fd >= 0)
+    {
+    	Log("Closing port.", IBALogger::LOGS_DEBUG);
         close(m_fd);
+    }
     m_fd = -1;
 }
 
 void IBusPort::resetPort()
 {
+	Log("Resetting port.", IBALogger::LOGS_DEBUG);
     closePort();
     openPort();
 }

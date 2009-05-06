@@ -33,8 +33,9 @@ public:
     MusicLibBrowser();
     virtual ~MusicLibBrowser() {};
 
-    void                Init(AlsaPlayerCntr&);
+    bool                Init(AlsaPlayerCntr&);
 
+	const ListItem&		CurrentItem();
 	const string&		Menu();
 	const string&		Select(bool withPlay = false, bool withAdd = false);
     const string&       Next();

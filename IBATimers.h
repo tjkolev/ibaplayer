@@ -45,7 +45,7 @@ public:
     IBATimers();
     ~IBATimers();
 
-    void init();
+    bool init();
     void setTimer(timerID, float sec, IBATimerListener*);
 
     void startAll();

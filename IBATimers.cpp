@@ -43,7 +43,7 @@ void timerHandler(sigval_t sa)
     ibat->onTimer();
 }
 
-void IBATimers::init()
+bool IBATimers::init()
 {
     m_tspec.it_value.tv_sec = 0;
     m_tspec.it_value.tv_nsec = MIN_INTERVAL * 1000000L; //millisec to nanosec
@@ -58,6 +58,8 @@ void IBATimers::init()
 
     result = timer_settime(m_sysTimerId, 0, &m_tspec, NULL);
     assert(0 == result);
+
+    return true;
 }
 
 void IBATimers::setTimer(timerID ti, float sec, IBATimerListener* lsn)

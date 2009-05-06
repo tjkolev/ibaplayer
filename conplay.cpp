@@ -18,14 +18,16 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "IBAPlayer.h"
+#include <iostream>
+#include "MusicLib/MusicLibrary.h"
 
-void consolePlay(IBAPlayer* player)
+using namespace std;
+
+extern void PrintList(const CascadeList_t& lst);
+
+void consolePlay()
 {
-    if(NULL == player)
-		return;
-
-    AlsaPlayerCntr& ap = player->getPlayer();
+    AlsaPlayerCntr ap;
 	if(!ap.isApRunning())
 	{
 		cout << "Alsa player does not seem to be running.\n";

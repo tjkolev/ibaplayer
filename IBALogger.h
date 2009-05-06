@@ -35,13 +35,12 @@ public:
 
     enum Severity
     {
+        LOGS_CRASH     = 5,
+        LOGS_ERROR     = 4,
+        LOGS_WARNING   = 3,
+        LOGS_INFO      = 2,
+        LOGS_DEBUG     = 1,
         LOGS_NONE      = 0,
-        LOGS_CRASH     = 1,
-        LOGS_ERROR     = 2,
-        LOGS_WARNING   = 4,
-        LOGS_INFO      = 8,
-        LOGS_DEBUG     = 16,
-        LOGS_ALL       = LOGS_CRASH + LOGS_ERROR + LOGS_WARNING + LOGS_INFO + LOGS_DEBUG
     };
 
     enum Output
@@ -52,22 +51,23 @@ public:
         LOGO_FILE
     };
 
-    void log(const char*, Severity svr = LOGS_INFO);
+    void		log(const char*, Severity svr = LOGS_INFO);
 
-    void setLogOutput(Output, const string& fileName);
-    void setLogLevel(int severityLevel);
-    int  getLogLevel();
+    void		setLogOutput(Output, const string& fileName);
+    void		setLogLevel(Severity);
+    Severity	getLogLevel();
 
 
 private:
 
     IBALogger();
-	static IBALogger _theLogger;
-    ostream*         m_out;
-    ofstream         m_fout;
-    int              m_svrLevel;
+	static IBALogger	_theLogger;
+    ostream*		m_out;
+    ofstream		m_fout;
+    Severity		m_svrLevel;
 
-    char             getSvrLevelChar(Severity);
+    char            getSvrLevelChar(Severity);
+    void			LogMessage(const char*, Severity svr = LOGS_INFO);
 };
 
 void Log(const char*, IBALogger::Severity svr = IBALogger::LOGS_INFO);

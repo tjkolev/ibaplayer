@@ -41,6 +41,7 @@ AlsaPlayerCntr::~AlsaPlayerCntr()
 
 bool AlsaPlayerCntr::init()
 {
+	Log("Initializing Alsa player control.", IBALogger::LOGS_DEBUG);
     m_apName = GetConfigValue<string>(PRMS_ALSAPLAYER_NAME);
     string tagSep = GetConfigValue<string>(PRMS_TAG_SEPARATOR);
     m_tagSeparator[1] = tagSep[0];

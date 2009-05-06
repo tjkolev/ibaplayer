@@ -89,6 +89,7 @@ bool MusicLibDb::Create()
 		return false;
 	}
 
+	Log("Created new database file.", IBALogger::LOGS_DEBUG);
 	Populate();
 
 	return true;
@@ -105,6 +106,7 @@ bool MusicLibDb::Open()
 		return Create();
 	}
 
+	Log("Opened database.", IBALogger::LOGS_DEBUG);
 	return true;
 }
 
@@ -136,6 +138,7 @@ using namespace TagLib;
 
 void MusicLibDb::Populate()
 {
+	Log("Populating database.", IBALogger::LOGS_DEBUG);
 	PrepareAddStatements();
 
 	//string path(PRMS_LIB_PATH);
@@ -178,6 +181,7 @@ void MusicLibDb::Populate()
     }
 
     DisposeAddStatements();
+    Log("Database populated.", IBALogger::LOGS_DEBUG);
 }
 
 const string SQL_Insert_Genre = "INSERT INTO Genre(Name) VALUES(?001);";

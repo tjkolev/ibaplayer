@@ -38,7 +38,7 @@ MusicLibBrowser::MusicLibBrowser()
 {
 }
 
-void MusicLibBrowser::Init(AlsaPlayerCntr& ap)
+bool MusicLibBrowser::Init(AlsaPlayerCntr& ap)
 {
 	_cascadeLists[TOP_MENU_LIST].push_back(ListItem(1, "Genres"));
 	_cascadeLists[TOP_MENU_LIST].push_back(ListItem(2, "Artists"));
@@ -51,7 +51,8 @@ void MusicLibBrowser::Init(AlsaPlayerCntr& ap)
 
 	ResetMenus();
 
-	_musicDb.Open();
+	if(!_musicDb.Open())
+		return false;
 
     _pagingSize = GetConfigValue<float>(PRMS_PAGE_SIZE);
     if(_pagingSize <= 0)
@@ -62,6 +63,8 @@ void MusicLibBrowser::Init(AlsaPlayerCntr& ap)
 
     _pAp = &ap;
     _pAp->Subscribe(this);
+
+    return true;
 }
 
 void MusicLibBrowser::ResetMenus()
@@ -92,6 +95,11 @@ CascadeList_t& MusicLibBrowser::CurrentCascadeList()
 ListItem& MusicLibBrowser::AtItem()
 {
 	return CurrentCascadeList().AtItem();
+}
+
+const ListItem& MusicLibBrowser::CurrentItem()
+{
+	return AtItem();
 }
 
 ListItem& MusicLibBrowser::PrevItem()
@@ -335,7 +343,6 @@ const string& MusicLibBrowser::Select(bool withPlay, bool withAdd)
 				break;
 			case 1:
 				withPlay = withAdd = false;
-				//TODO Move play pointer
 				_pAp->SetPosition(PlayQueue(false).AtItem().Path);
 				break;
 			}

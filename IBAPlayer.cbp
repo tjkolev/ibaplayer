@@ -74,6 +74,7 @@
 		<Unit filename="IBusPort.cpp" />
 		<Unit filename="IBusPort.h" />
 		<Unit filename="MsgProcessor.cpp" />
+		<Unit filename="MsgProcessor.h" />
 		<Unit filename="MusicLib/MusicLibDb.cpp" />
 		<Unit filename="MusicLib/MusicLibDb.h" />
 		<Unit filename="MusicLib/MusicLibrary.cpp" />

@@ -58,7 +58,7 @@ void IBAConfig::load()
         }
     }
 
-	Log("Unable to load configuration file. Using defaults.");
+	Log("Unable to load configuration file. Using defaults.", IBALogger::LOGS_WARNING);
 } // load()
 
 
@@ -69,7 +69,6 @@ void IBAConfig::setDefaultParams()
     m_defaults[PRMS_PAGE_SIZE] = "1.0";
     m_defaults[PRMS_LOG_FILE] = "IBAPlayer.log";
     m_defaults[PRMS_SVR_LEVEL] = "7"; //IBALogger::LOGS_CRASH + IBALogger::LOGS_ERROR + IBALogger::LOGS_WARNING
-    m_defaults[PRMS_START_BROWSE] = "1";
     m_defaults[PRMS_ALSAPLAYER_NAME] = "IBusPlayer";
     m_defaults[PRMS_TAG_SEPARATOR] = "*";
     m_defaults[PRMS_IBUS_PORT] = "/dev/ttyS0";

@@ -28,7 +28,6 @@
 #define PRMS_PAGE_SIZE                  "PageSize"
 #define PRMS_LOG_FILE                   "LogFile"
 #define PRMS_SVR_LEVEL                  "SeverityLevel"
-#define PRMS_START_BROWSE               "StartBrowseLevel"
 #define PRMS_ALSAPLAYER_NAME            "AlsaPlayerName"
 #define PRMS_TAG_SEPARATOR              "TagSeparator"
 #define PRMS_IBUS_PORT                  "IBusPort"

@@ -42,6 +42,8 @@ IBusCntr::~IBusCntr()
 
 bool IBusCntr::init(IBATimers& timer)
 {
+	Log("Initializing ibus control.", IBALogger::LOGS_DEBUG);
+
     m_ibusLogLevel = GetConfigValue<int>(PRMS_LOG_IBUS);
     int delay = GetConfigValue<int>(PRMS_IBUS_RESPONSE_DELAY);
     m_respDelay = delay * 1000;
@@ -80,6 +82,7 @@ void IBusCntr::startAnnounce()
 
 void IBusCntr::run()
 {
+	Log("Starting ibus control loop.", IBALogger::LOGS_DEBUG);
     time(&m_pollWatch);
 
     m_ibus.send(IBUS_PACK_ANNOUNCE, sizeof(IBUS_PACK_ANNOUNCE));
