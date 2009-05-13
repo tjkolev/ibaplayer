@@ -106,9 +106,10 @@ static const byte IBUS_DATA_PREV_TRACK[]    = {0x38,0x0A,0x01};
 class IBusCntr : public IBusPortListener, IBATimerListener
 {
 public:
-    IBusCntr();
+    IBusCntr(bool monitorOnly = false);
     ~IBusCntr();
 
+	bool            init();
     bool            init(IBATimers&);
     void            run();
     void            setCDCplaying(bool);
@@ -147,13 +148,14 @@ private:
     void             pfmt(ostream& out, const byte* p);
 
 
-    IBATimers*       m_timer;
+    IBATimers*		m_timer;
 
-    IBusPort         m_ibus;
-    bool             m_cdc_playing;
-    int              m_ibusLogLevel;
-    unsigned long    m_respDelay;
-    time_t           m_pollWatch;
+	bool			m_monitorOnly;
+    IBusPort		m_ibus;
+    bool			m_cdc_playing;
+    int				m_ibusLogLevel;
+    unsigned long	m_respDelay;
+    time_t			m_pollWatch;
 
     //bool             m_isPolled;
 

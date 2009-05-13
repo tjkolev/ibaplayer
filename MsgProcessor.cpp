@@ -74,7 +74,7 @@ MsgProcessor::MsgProcessor()
 
     m_mode = MODE_INACTIVE;
     m_cdc_playing = false;
-    m_respDelay = 100000;
+    m_respDelay = 10000;
     m_outPos = false;
     m_outInfo = false;
     m_dispInfoNdx = 0;
@@ -175,7 +175,7 @@ void MsgProcessor::checkWatches()
     // Return to play mode after a time out
     if(MODE_BROWSE == m_mode && now - m_browseTime > IBA_BROWSE_TIMEOUT)
     {
-    	m_mode = MODE_BROWSE;
+    	m_mode = MODE_PLAY;
         setMIDLabels();
     }
 
@@ -235,7 +235,7 @@ void MsgProcessor::resetOBC()
 void MsgProcessor::setMIDLabels()
 {
     // wait a bit before setting up the labels to be sure to overwrite any the radio sets.
-    usleep(150000);
+    //usleep(150000);
 
     time(&m_lblTime);
 

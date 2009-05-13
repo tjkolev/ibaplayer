@@ -72,7 +72,7 @@ void IBAConfig::setDefaultParams()
     m_defaults[PRMS_ALSAPLAYER_NAME] = "IBusPlayer";
     m_defaults[PRMS_TAG_SEPARATOR] = "*";
     m_defaults[PRMS_IBUS_PORT] = "/dev/ttyS0";
-    m_defaults[PRMS_IBUS_RESPONSE_DELAY] = "150";
+    m_defaults[PRMS_IBUS_RESPONSE_DELAY] = "10";
     m_defaults[PRMS_IBUS_MONITOR_MODE] = "No";
     m_defaults[PRMS_LOG_IBUS] = "0";
     m_defaults[PRMS_IBUS_ANNOUNCE_COUNT] = "6";

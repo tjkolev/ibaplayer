@@ -23,6 +23,7 @@
 #include "IBATimers.h"
 
 IBATimers::IBATimers()
+	: m_sysTimerId(NULL)
 {
     m_tickCount = 0;
     memset(m_timers, 0, sizeof(m_timers));
@@ -30,7 +31,8 @@ IBATimers::IBATimers()
 
 IBATimers::~IBATimers()
 {
-    timer_delete(m_sysTimerId);
+	if(NULL != m_sysTimerId)
+		timer_delete(m_sysTimerId);
 }
 
 void timerHandler(sigval_t sa)

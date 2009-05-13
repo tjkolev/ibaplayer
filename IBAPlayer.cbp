@@ -11,7 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters="/home/tjkolev/Music/IBAPlayer.conf" />
+				<Option parameters="/home/tjkolev/Music/IBAPlayer.conf monitor" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
@@ -69,6 +69,7 @@
 		<Unit filename="IBAVer.h" />
 		<Unit filename="IBusCntr.cpp" />
 		<Unit filename="IBusCntr.h" />
+		<Unit filename="IBusMonitor.cpp" />
 		<Unit filename="IBusMsg.cpp" />
 		<Unit filename="IBusMsg.h" />
 		<Unit filename="IBusPort.cpp" />

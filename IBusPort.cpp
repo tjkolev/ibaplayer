@@ -92,9 +92,7 @@ bool IBusPort::openPort()
         return false;
     }
 
-    // Make the file descriptor asynchronous
-    fcntl(m_fd, F_SETFL, FASYNC);
-    //fcntl(m_fd, F_SETFL, FNDELAY);
+    fcntl(m_fd, F_SETFL, 0); //fcntl(m_fd, F_SETFL, FASYNC);
 
     struct termios term_options;
     tcgetattr(m_fd, &term_options);

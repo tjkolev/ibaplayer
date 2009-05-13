@@ -61,6 +61,7 @@ int IBAPlayer::run()
 //////////////////////////////////////////////
 
 extern void consolePlay();
+extern void ibusMonitor();
 
 void PrintList(const CascadeList_t& lst)
 {
@@ -111,16 +112,22 @@ if(false)
 	if(!player.Init())
 		return 1;
 
-    if(argc > 2)    // existance of second - console play
+    if(argc > 2)
     {
 		if(0 == strcmp(argv[2], "console"))
         {
             consolePlay();
             return 0;
         }
+        else if(0 == strcmp(argv[2], "monitor"))
+        {
+			IBALogger::Logger().setLogOutput(IBALogger::LOGO_CONSOLE, "");
+        	ibusMonitor();
+        	return 0;
+        }
         else
         {
-        	cout << "The only acceptable parameter is 'console'";
+        	cout << "The only acceptable parameters are 'console' or 'monitor'";
             return 1;
         }
     }

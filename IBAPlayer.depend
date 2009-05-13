@@ -223,7 +223,7 @@
 1232035859 /home/tjkolev/IBAPlayer/src/IBAPlayer/sqlite3/sqlite3.h
 	<stdarg.h>
 
-1240169755 source:/home/tjkolev/src/IBAPlayer/IBAConfig.cpp
+1242096454 source:/home/tjkolev/src/IBAPlayer/IBAConfig.cpp
 	"IBAConfig.h"
 	"IBALogger.h"
 
@@ -242,7 +242,7 @@
 	<iostream>
 	<fstream>
 
-1240667336 source:/home/tjkolev/src/IBAPlayer/IBAPlayer.cpp
+1241983308 source:/home/tjkolev/src/IBAPlayer/IBAPlayer.cpp
 	<assert.h>
 	"IBAVer.h"
 	"IBAPlayer.h"
@@ -273,7 +273,7 @@
 	"control.h"
 	"IBAList.h"
 
-1239339605 /home/tjkolev/src/IBAPlayer/IBusCntr.h
+1241982184 /home/tjkolev/src/IBAPlayer/IBusCntr.h
 	"IBusPort.h"
 	"IBATimers.h"
 
@@ -352,12 +352,12 @@
 	<sys/time.h>
 	<time.h>
 
-1240667163 source:/home/tjkolev/src/IBAPlayer/IBATimers.cpp
+1241984425 source:/home/tjkolev/src/IBAPlayer/IBATimers.cpp
 	<assert.h>
 	<string>
 	"IBATimers.h"
 
-1240170695 source:/home/tjkolev/src/IBAPlayer/IBusCntr.cpp
+1241983420 source:/home/tjkolev/src/IBAPlayer/IBusCntr.cpp
 	<assert.h>
 	"IBAConfig.h"
 	"IBALogger.h"
@@ -372,7 +372,7 @@
 1239339707 source:/home/tjkolev/src/IBAPlayer/IBusMsg.cpp
 	"IBusMsg.h"
 
-1240176851 source:/home/tjkolev/src/IBAPlayer/IBusPort.cpp
+1242087946 source:/home/tjkolev/src/IBAPlayer/IBusPort.cpp
 	<termios.h>
 	<stdio.h>
 	<unistd.h>
@@ -381,7 +381,7 @@
 	"IBAConfig.h"
 	"IBALogger.h"
 
-1240177260 source:/home/tjkolev/src/IBAPlayer/MsgProcessor.cpp
+1242096926 source:/home/tjkolev/src/IBAPlayer/MsgProcessor.cpp
 	<assert.h>
 	"IBusMsg.h"
 	"MsgProcessor.h"
@@ -463,4 +463,7 @@
 	"IBATimers.h"
 	"IBusCntr.h"
 	"MusicLibrary.h"
+
+1241982825 source:/home/tjkolev/src/IBAPlayer/IBusMonitor.cpp
+	"IBusCntr.h"
 

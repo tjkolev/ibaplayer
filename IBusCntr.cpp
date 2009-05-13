@@ -25,14 +25,15 @@
 #include "IBusCntr.h"
 #include "IBusMsg.h"
 
-IBusCntr::IBusCntr()
+IBusCntr::IBusCntr(bool monitorOnly)
 {
-    m_ibusLogLevel    = IBUS_LOG_LEVEL_NONE;
-    m_head            = 0;
-    m_tail            = m_head; // all consumed
-    //m_isPolled        = false;
-    m_respDelay       = 100000;
-    m_cdc_playing     = false;
+	m_monitorOnly		= monitorOnly;
+    m_ibusLogLevel		= IBUS_LOG_LEVEL_NONE;
+    m_head				= 0;
+    m_tail				= m_head; // all consumed
+    //m_isPolled		= false;
+    m_respDelay			= 100000;
+    m_cdc_playing		= false;
 }
 
 IBusCntr::~IBusCntr()
@@ -40,7 +41,7 @@ IBusCntr::~IBusCntr()
     m_ibus.closePort();
 }
 
-bool IBusCntr::init(IBATimers& timer)
+bool IBusCntr::init()
 {
 	Log("Initializing ibus control.", IBALogger::LOGS_DEBUG);
 
@@ -50,8 +51,14 @@ bool IBusCntr::init(IBATimers& timer)
 
     m_ibus.regListener(*this);
 
-    if(!m_ibus.init())
-        return false;
+	return m_ibus.init();
+}
+
+bool IBusCntr::init(IBATimers& timer)
+{
+	init();
+	if(m_monitorOnly)
+		return true;
 
     m_timer = &timer;
     float cfgSec = GetConfigValue<float>(PRMS_IBUS_ANNOUNCE_IVL);
@@ -82,12 +89,19 @@ void IBusCntr::startAnnounce()
 
 void IBusCntr::run()
 {
-	Log("Starting ibus control loop.", IBALogger::LOGS_DEBUG);
-    time(&m_pollWatch);
+	if(m_monitorOnly)
+	{
+		Log("Starting ibus control in monitor mode.", IBALogger::LOGS_DEBUG);
+	}
+	else
+	{
+		Log("Starting ibus control loop.", IBALogger::LOGS_DEBUG);
+		time(&m_pollWatch);
 
-    m_ibus.send(IBUS_PACK_ANNOUNCE, sizeof(IBUS_PACK_ANNOUNCE));
+		m_ibus.send(IBUS_PACK_ANNOUNCE, sizeof(IBUS_PACK_ANNOUNCE));
 
-    startAnnounce();
+		startAnnounce();
+	}
 
     while(true)
     {
@@ -328,6 +342,9 @@ void IBusCntr::processRcvPacket()
             Log(out.str(), IBALogger::LOGS_DEBUG);
         }
     }
+
+	if(m_monitorOnly)
+		return;
 
     // Only listen to requests from the radio
     // and stop announcing
