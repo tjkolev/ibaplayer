@@ -40,6 +40,9 @@
 #define PRMS_TRACK_POS_IVL              "TrackPositionInterval"
 #define PRMS_TRACK_INFO_IVL             "TrackInfoInterval"
 #define PRMS_TRACK_INFO_SCROLL_CHARS    "TrackInfoScrollChars"
+#define PRMS_IBUS_LABELS_TIMEOUT		"IBusLabelsTimeout"
+#define PRMS_BROWSE_TIMEOUT				"BrowseTimeout"
+#define PRMS_IBUS_STATUS_TIMEOUT		"IBusStatusTimeout"
 
 #include <string>
 

@@ -46,7 +46,7 @@ bool MusicLibBrowser::Init(AlsaPlayerCntr& ap)
 	_cascadeLists[TOP_MENU_LIST].push_back(ListItem(4, "Playlists"));
 	_cascadeLists[TOP_MENU_LIST].push_back(ListItem(5, "Play Queue"));
 	_cascadeLists[TOP_MENU_LIST].push_back(ListItem(6, "Shuffle"));
-	_cascadeLists[TOP_MENU_LIST].push_back(ListItem(7, "Random Pick 20"));
+	_cascadeLists[TOP_MENU_LIST].push_back(ListItem(7, "Random Pick 50"));
 	_cascadeLists[TOP_MENU_LIST].push_back(ListItem(8, "Reindex"));
 
 	ResetMenus();

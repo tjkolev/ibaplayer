@@ -17,10 +17,10 @@
 		<Cursor position="0" topLine="102" />
 	</File>
 	<File name="IBAConfig.cpp" open="0" top="0" tabpos="6">
-		<Cursor position="2719" topLine="47" />
+		<Cursor position="3228" topLine="53" />
 	</File>
 	<File name="IBAConfig.h" open="0" top="0" tabpos="8">
-		<Cursor position="3322" topLine="19" />
+		<Cursor position="2786" topLine="0" />
 	</File>
 	<File name="IBAList.cpp" open="0" top="0" tabpos="7">
 		<Cursor position="1517" topLine="15" />
@@ -49,8 +49,8 @@
 	<File name="IBAVer.h" open="0" top="0" tabpos="0">
 		<Cursor position="1594" topLine="0" />
 	</File>
-	<File name="IBusCntr.cpp" open="1" top="0" tabpos="1">
-		<Cursor position="2782" topLine="244" />
+	<File name="IBusCntr.cpp" open="0" top="0" tabpos="1">
+		<Cursor position="7224" topLine="279" />
 	</File>
 	<File name="IBusCntr.h" open="0" top="0" tabpos="4">
 		<Cursor position="6421" topLine="95" />
@@ -70,11 +70,11 @@
 	<File name="IBusPort.h" open="0" top="0" tabpos="11">
 		<Cursor position="1914" topLine="32" />
 	</File>
-	<File name="MsgProcessor.cpp" open="1" top="1" tabpos="2">
-		<Cursor position="6191" topLine="160" />
+	<File name="MsgProcessor.cpp" open="1" top="1" tabpos="1">
+		<Cursor position="6237" topLine="150" />
 	</File>
-	<File name="MsgProcessor.h" open="1" top="0" tabpos="3">
-		<Cursor position="2001" topLine="24" />
+	<File name="MsgProcessor.h" open="0" top="0" tabpos="3">
+		<Cursor position="3343" topLine="62" />
 	</File>
 	<File name="MusicLib/MusicLibDb.cpp" open="0" top="0" tabpos="6">
 		<Cursor position="6090" topLine="75" />
@@ -82,8 +82,8 @@
 	<File name="MusicLib/MusicLibDb.h" open="0" top="0" tabpos="7">
 		<Cursor position="1749" topLine="7" />
 	</File>
-	<File name="MusicLib/MusicLibrary.cpp" open="0" top="0" tabpos="6">
-		<Cursor position="2532" topLine="38" />
+	<File name="MusicLib/MusicLibrary.cpp" open="0" top="0" tabpos="4">
+		<Cursor position="10985" topLine="380" />
 	</File>
 	<File name="MusicLib/MusicLibrary.h" open="0" top="0" tabpos="4">
 		<Cursor position="1831" topLine="29" />

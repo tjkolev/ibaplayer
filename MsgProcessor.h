@@ -89,6 +89,10 @@ private:
     bool                m_scrollTrackInfo;
     int                 m_scrollChars;
     int                 m_scrollPos;
+
+    int					m_ibusLabelsTimeout;
+    int					m_ibusStatusTimeout;
+    int					m_browseTimeout;
 };
 
 

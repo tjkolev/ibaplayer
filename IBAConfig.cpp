@@ -81,5 +81,8 @@ void IBAConfig::setDefaultParams()
     m_defaults[PRMS_TRACK_POS_IVL] = "1";
     m_defaults[PRMS_TRACK_INFO_IVL] = "1";
     m_defaults[PRMS_TRACK_INFO_SCROLL_CHARS] = "2";
+    m_defaults[PRMS_IBUS_LABELS_TIMEOUT] = "30";
+    m_defaults[PRMS_BROWSE_TIMEOUT] = "15";
+    m_defaults[PRMS_IBUS_STATUS_TIMEOUT] = "180";
 } // IBAConfig::fillDefaultParams()
 

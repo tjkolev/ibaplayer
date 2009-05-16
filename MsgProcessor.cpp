@@ -63,10 +63,6 @@ static const byte IBUS_RESET_OBC_LCD[] = {0x23, 0x01, 0x00};
 #define MID_SCAN_ON             105
 #define MID_SCAN_OFF            106
 
-#define IBA_LABELS_TIMEOUT      30      // seconds
-#define IBA_BROWSE_TIMEOUT      15
-#define IBA_STATUS_TIMEOUT      180
-
 
 MsgProcessor::MsgProcessor()
 {
@@ -81,6 +77,10 @@ MsgProcessor::MsgProcessor()
     m_scrollTrackInfo = false;
     m_scrollChars = 2;
     m_scrollPos = 0;
+    // timeouts are in seconds
+    m_ibusLabelsTimeout = 30;
+    m_ibusStatusTimeout = 180;
+    m_browseTimeout = 15;
 }
 
 MsgProcessor::~ MsgProcessor()
@@ -108,6 +108,10 @@ bool MsgProcessor::init(IBATimers& timers)
 		return false;
 	if(!m_ibus.init(*m_timers))
 		return false;
+
+	m_ibusLabelsTimeout = GetConfigValue<int>(PRMS_IBUS_LABELS_TIMEOUT);
+	m_ibusStatusTimeout = GetConfigValue<int>(PRMS_IBUS_STATUS_TIMEOUT);
+	m_browseTimeout = GetConfigValue<int>(PRMS_BROWSE_TIMEOUT);
 
     int delay = GetConfigValue<int>(PRMS_IBUS_RESPONSE_DELAY);
     m_respDelay = delay * 1000;
@@ -169,19 +173,18 @@ void MsgProcessor::checkWatches()
 
     // occasionally the radio refreshes the labels to their
     // originals. So every now and then I refresh them to mine
-    if(now - m_lblTime > IBA_LABELS_TIMEOUT)
+    if(now - m_lblTime > m_ibusLabelsTimeout)
         setMIDLabels();
 
     // Return to play mode after a time out
-    if(MODE_BROWSE == m_mode && now - m_browseTime > IBA_BROWSE_TIMEOUT)
+    if(MODE_BROWSE == m_mode && now - m_browseTime > m_browseTimeout)
     {
     	m_mode = MODE_PLAY;
-        setMIDLabels();
     }
 
     // this is an attempt to prevent the radio for sporadically disconnecting
     // the CD Changer audio source. Not sure if it helps at all
-    if(m_cdc_playing && now - m_statusTime > IBA_STATUS_TIMEOUT)
+    if(m_cdc_playing && now - m_statusTime > m_ibusStatusTimeout)
         sendStatus();
 }
 
@@ -471,7 +474,6 @@ void MsgProcessor::handleBrowseButton(int button)
             Log("Browse: Play.", IBALogger::LOGS_DEBUG);
             m_lib.Play();
             m_mode = MODE_PLAY;
-            setMIDLabels();
             break;
         case MID_BUTN_CD6: // Add
             Log("Browse: Add.", IBALogger::LOGS_DEBUG);
@@ -496,7 +498,6 @@ void MsgProcessor::toBrowseMode()
 
     Log("To browse mode.", IBALogger::LOGS_DEBUG);
 	m_mode = MODE_BROWSE;
-    setMIDLabels();
     txt = m_lib.CurrentItem().Name.c_str();
     time(&m_browseTime);
     if(NULL == txt)
