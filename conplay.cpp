@@ -28,6 +28,7 @@ extern void PrintList(const CascadeList_t& lst);
 void consolePlay()
 {
     AlsaPlayerCntr ap;
+    ap.init();
 	if(!ap.isApRunning())
 	{
 		cout << "Alsa player does not seem to be running.\n";

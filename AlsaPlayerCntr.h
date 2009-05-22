@@ -85,10 +85,10 @@ private:
     char*	getInfoFromPlayer();
     char*	getInfoFromFile();
 
-    int               m_apSession;
-    string            m_apName;
-
-    int               m_playlistPosition;
+    int				m_apSession;
+    string			m_apName;
+	bool			m_fullInfoNeeded;
+    int				m_playlistPosition;
 
 	char	m_path[AP_FILE_PATH_MAX];
     char    m_track[AP_TRACK_NUMBER_MAX];

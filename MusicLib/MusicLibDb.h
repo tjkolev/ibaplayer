@@ -61,7 +61,7 @@ public:
 	void LoadTracksByAlbum(CascadeList_t& lst, int albumId);
 	void LoadTracksByPlaylist(CascadeList_t& lst, int playlistId);
 	void LoadTracksRandomPick(CascadeList_t& lst, int count);
-
+	int FindTrackByPath(const string&);
 	int LoadTrackCount();
 
 	template <typename T>
@@ -77,6 +77,8 @@ private:
 
 	bool	Create();
 	void	Populate();
+	void	PopulatePlaylists();
+	void	PopulatePlaylist(int playlistId, const string& fileName);
 	void	PrepareAddStatements();
 	void	DisposeAddStatements();
 	int		AddGenre(Tag*);
@@ -84,7 +86,7 @@ private:
 	int		AddAlbum(Tag*);
 	void	AddTrack(Tag*, const string& path);
 	int		AddPlaylist(const string& name, const string& path);
-	void	AddPlaylistTrack();
+	void	AddPlaylistTrack(int, int, int);
 	void	LoadList(CascadeList_t& lst, const string& sql, int id1 = INVALID_SQL_ID, int id2 = INVALID_SQL_ID);
 
 	void 	Save_Setting(const string& name, const string& value);
@@ -102,6 +104,7 @@ private:
 	sqlite3_stmt*		_psqlInsertTrack;
 	sqlite3_stmt*		_psqlInsertPlaylist;
 	sqlite3_stmt*		_psqlFindPlaylist;
+	sqlite3_stmt*		_psqlInsertPlaylistTrack;
 
 	string				_lastGenreName;
 	int					_lastGenreId;
@@ -109,10 +112,7 @@ private:
 	int					_lastArtistId;
 	string				_lastAlbumName;
 	int                 _lastAlbumYear;
-	//int					_lastAlbumArtistId;
 	int					_lastAlbumId;
-	string				_lastPlaylistPath;
-	int					_lastPlaylistId;
 };
 
 template <typename T>

@@ -1,20 +1,26 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="AlsaPlayerCntr.cpp" open="0" top="0" tabpos="2">
-		<Cursor position="1914" topLine="31" />
+	<File name="AlsaPlayerCntr.cpp" open="1" top="0" tabpos="1">
+		<Cursor position="7364" topLine="29" />
 	</File>
 	<File name="AlsaPlayerCntr.h" open="0" top="0" tabpos="5">
-		<Cursor position="2042" topLine="26" />
+		<Cursor position="2739" topLine="78" />
 	</File>
-	<File name="ConfigFile/ConfigFile.cpp" open="0" top="0" tabpos="0">
-		<Cursor position="0" topLine="21" />
+	<File name="ConfigFile/ConfigFile.cpp" open="0" top="0" tabpos="3">
+		<Cursor position="2402" topLine="45" />
 	</File>
 	<File name="ConfigFile/ConfigFile.h" open="0" top="0" tabpos="9">
-		<Cursor position="1923" topLine="34" />
+		<Cursor position="1923" topLine="175" />
+	</File>
+	<File name="FileSys/file_iterator-impl.h" open="0" top="0" tabpos="0">
+		<Cursor position="0" topLine="280" />
 	</File>
 	<File name="FileSys/file_iterator.h" open="0" top="0" tabpos="0">
-		<Cursor position="0" topLine="102" />
+		<Cursor position="0" topLine="166" />
+	</File>
+	<File name="FileSys/file_t.h" open="0" top="0" tabpos="0">
+		<Cursor position="195" topLine="0" />
 	</File>
 	<File name="IBAConfig.cpp" open="0" top="0" tabpos="6">
 		<Cursor position="3228" topLine="53" />
@@ -34,8 +40,8 @@
 	<File name="IBALogger.h" open="0" top="0" tabpos="6">
 		<Cursor position="2442" topLine="33" />
 	</File>
-	<File name="IBAPlayer.cpp" open="0" top="0" tabpos="1">
-		<Cursor position="1925" topLine="91" />
+	<File name="IBAPlayer.cpp" open="1" top="1" tabpos="2">
+		<Cursor position="3675" topLine="109" />
 	</File>
 	<File name="IBAPlayer.h" open="0" top="0" tabpos="3">
 		<Cursor position="1825" topLine="13" />
@@ -49,8 +55,8 @@
 	<File name="IBAVer.h" open="0" top="0" tabpos="0">
 		<Cursor position="1594" topLine="0" />
 	</File>
-	<File name="IBusCntr.cpp" open="0" top="0" tabpos="1">
-		<Cursor position="7224" topLine="279" />
+	<File name="IBusCntr.cpp" open="1" top="0" tabpos="3">
+		<Cursor position="2249" topLine="37" />
 	</File>
 	<File name="IBusCntr.h" open="0" top="0" tabpos="4">
 		<Cursor position="6421" topLine="95" />
@@ -59,40 +65,40 @@
 		<Cursor position="1572" topLine="0" />
 	</File>
 	<File name="IBusMsg.cpp" open="0" top="0" tabpos="0">
-		<Cursor position="1791" topLine="0" />
+		<Cursor position="1791" topLine="18" />
 	</File>
 	<File name="IBusMsg.h" open="0" top="0" tabpos="0">
 		<Cursor position="1562" topLine="13" />
 	</File>
-	<File name="IBusPort.cpp" open="0" top="0" tabpos="4">
-		<Cursor position="2970" topLine="75" />
+	<File name="IBusPort.cpp" open="1" top="0" tabpos="4">
+		<Cursor position="2224" topLine="34" />
 	</File>
 	<File name="IBusPort.h" open="0" top="0" tabpos="11">
 		<Cursor position="1914" topLine="32" />
 	</File>
-	<File name="MsgProcessor.cpp" open="1" top="1" tabpos="1">
-		<Cursor position="6237" topLine="150" />
+	<File name="MsgProcessor.cpp" open="1" top="0" tabpos="5">
+		<Cursor position="4316" topLine="95" />
 	</File>
-	<File name="MsgProcessor.h" open="0" top="0" tabpos="3">
-		<Cursor position="3343" topLine="62" />
+	<File name="MsgProcessor.h" open="1" top="0" tabpos="6">
+		<Cursor position="1997" topLine="35" />
 	</File>
-	<File name="MusicLib/MusicLibDb.cpp" open="0" top="0" tabpos="6">
-		<Cursor position="6090" topLine="75" />
+	<File name="MusicLib/MusicLibDb.cpp" open="0" top="0" tabpos="1">
+		<Cursor position="12423" topLine="599" />
 	</File>
-	<File name="MusicLib/MusicLibDb.h" open="0" top="0" tabpos="7">
-		<Cursor position="1749" topLine="7" />
+	<File name="MusicLib/MusicLibDb.h" open="0" top="0" tabpos="2">
+		<Cursor position="4659" topLine="99" />
 	</File>
 	<File name="MusicLib/MusicLibrary.cpp" open="0" top="0" tabpos="4">
-		<Cursor position="10985" topLine="380" />
+		<Cursor position="10985" topLine="19" />
 	</File>
 	<File name="MusicLib/MusicLibrary.h" open="0" top="0" tabpos="4">
 		<Cursor position="1831" topLine="29" />
 	</File>
-	<File name="conplay.cpp" open="0" top="0" tabpos="7">
-		<Cursor position="1632" topLine="0" />
+	<File name="conplay.cpp" open="0" top="0" tabpos="5">
+		<Cursor position="2892" topLine="0" />
 	</File>
 	<File name="sqlite3/sqlite3.c" open="0" top="0" tabpos="3">
-		<Cursor position="976248" topLine="25996" />
+		<Cursor position="848998" topLine="22051" />
 	</File>
 	<File name="sqlite3/sqlite3.h" open="0" top="0" tabpos="0">
 		<Cursor position="16808" topLine="367" />

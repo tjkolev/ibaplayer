@@ -56,7 +56,9 @@ bool IBusCntr::init()
 
 bool IBusCntr::init(IBATimers& timer)
 {
-	init();
+	if(!init())
+		return false;
+
 	if(m_monitorOnly)
 		return true;
 

@@ -32,6 +32,7 @@ AlsaPlayerCntr::AlsaPlayerCntr()
     m_playlistPosition = -1;
     strcpy(m_tagSeparator, " * ");
     m_miscInfo[m_maxMiscInfoLen] = 0;
+    m_fullInfoNeeded = false;
 }
 
 AlsaPlayerCntr::~AlsaPlayerCntr()
@@ -136,13 +137,6 @@ void AlsaPlayerCntr::previous()
     ap_prev(m_apSession);
 }
 
-/*
-void AlsaPlayerCntr::setShuffle(bool isOn)
-{
-    ap_shuffle_playlist(m_apSession);
-}
-*/
-
 void AlsaPlayerCntr::setLoop(bool isOn)
 {
     ap_set_playlist_looping(m_apSession, isOn);
@@ -244,6 +238,7 @@ char* AlsaPlayerCntr::getGenre()
 
 char* AlsaPlayerCntr::getInfo()
 {
+	m_fullInfoNeeded = true;
 	fillInfo();
     return m_info;
 }
@@ -347,8 +342,11 @@ void AlsaPlayerCntr::fillInfo()
 				return;
 			}
 
-	sprintf(m_info, "%s%s%s%s%s%s%s%s",
+	if(m_fullInfoNeeded)
+	{
+		sprintf(m_info, "%s%s%s%s%s%s%s%s",
 					m_track, m_tagSeparator, m_title, m_tagSeparator, m_album, m_tagSeparator, m_artist, m_tagSeparator);
+	}
 }
 
 

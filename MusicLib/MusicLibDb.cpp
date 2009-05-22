@@ -136,12 +136,32 @@ bool MusicLibDb::Reindex()
 using namespace filesystem;
 using namespace TagLib;
 
+string& ToLower(string& s)
+{
+	for(size_t n = 0; n < s.length(); n++)
+	{
+		s.replace(n, 1, 1, tolower(s[n]));
+	}
+	return s;
+}
+
+bool HasExtension(const string& fileName, const string& extension)
+{
+	size_t extLen = extension.length();
+	if(fileName.length() < extLen + 1)
+		return false;
+
+	string ext = fileName.substr(fileName.length() - extLen, extLen);
+    ext = ToLower(ext);
+    return extension == ext;
+
+}
+
 void MusicLibDb::Populate()
 {
 	Log("Populating database.", IBALogger::LOGS_DEBUG);
 	PrepareAddStatements();
 
-	//string path(PRMS_LIB_PATH);
 	string libPath = GetConfigValue<string>(PRMS_LIB_PATH);
     for( file_iterator<> itFile(libPath.c_str());
          itFile != itFile.end();
@@ -154,20 +174,13 @@ void MusicLibDb::Populate()
 
         // TODO put in configuration.
         // TODO find if file_iterator can do filtering
-        if(fileName.substr(fileName.size() - 4, 4) != ".mp3")
+        if(!HasExtension(fileName, ".mp3"))
         {
         	Log("File skipped:" + fileName, IBALogger::LOGS_INFO);
             continue;
         }
 
-        //FileRef mfile(fileName.c_str(), true, AudioProperties::Fast);
         FileRef mfile(fileName.c_str());
-
-        /*if(NULL == mfile.audioProperties())
-        {
-        	Log("No audio properties: " + fileName, IBALogger::LOGS_WARNING);
-            continue;
-        }*/
 
         Tag* mtag = mfile.tag();
         if(NULL == mtag)
@@ -180,8 +193,64 @@ void MusicLibDb::Populate()
         }
     }
 
+	PopulatePlaylists();
+
     DisposeAddStatements();
     Log("Database populated.", IBALogger::LOGS_DEBUG);
+}
+
+void MusicLibDb::PopulatePlaylists()
+{
+	Log("Processing playlists", IBALogger::LOGS_DEBUG);
+
+	// scan the base music lib path for .m3u files
+	string libPath = GetConfigValue<string>(PRMS_LIB_PATH);
+    for( file_iterator<> itFile(libPath.c_str());
+         itFile != itFile.end();
+         itFile.advance(false)) // do not iterate subdirectories
+    {
+        file_t currFile = *itFile;
+        const string& fileName = currFile.getName();
+        if(isDirectory(fileName))
+            continue;
+
+        if(!HasExtension(fileName, ".m3u"))
+        {
+        	Log("File skipped:" + fileName, IBALogger::LOGS_INFO);
+            continue;
+        }
+
+		int lastDot = fileName.find_last_of(".");
+		int lastSlash = fileName.find_last_of("/");
+		string plistName = fileName.substr(lastSlash + 1, lastDot - lastSlash - 1);
+		int playlistId = AddPlaylist(plistName, fileName);
+        PopulatePlaylist(playlistId, fileName);
+        Log("Processed playlist " + fileName, IBALogger::LOGS_INFO);
+    }
+}
+
+void MusicLibDb::PopulatePlaylist(int playlistId, const string& fileName)
+{
+	// read all lines
+	// ignore blank ones and comments (those that start with #)
+	ifstream inf(fileName.c_str());
+	string line;
+	int num = 0;
+	while(getline(inf, line))
+	{
+		if(line[0] == '#')
+			continue;
+
+		line.erase(0, line.find_first_not_of(" \t"));
+		if(!HasExtension(line, ".mp3"))
+			continue;
+
+		int trackId = FindTrackByPath(line);
+		if(trackId < 1)
+			continue;
+
+		AddPlaylistTrack(playlistId, num++, trackId);
+	}
 }
 
 const string SQL_Insert_Genre = "INSERT INTO Genre(Name) VALUES(?001);";
@@ -291,52 +360,33 @@ const string SQL_Insert_Playlist = "INSERT INTO Playlist(Name, Path) VALUES(?001
 const string SQL_Find_Playlist = "SELECT Id FROM Playlist WHERE Path = ?001;";
 int MusicLibDb::AddPlaylist(const string& name, const string& path)
 {
-	if(_lastPlaylistPath == path)
-		return _lastPlaylistId;
-
+	int playlistId;
 	int rc = sqlite3_bind_text(_psqlFindPlaylist, 1, path.c_str(), -1, SQLITE_STATIC);
 	if(SQLITE_ROW == (rc = sqlite3_step(_psqlFindPlaylist)))
 	{
-		_lastPlaylistId = sqlite3_column_int(_psqlFindPlaylist, 0);
+		playlistId = sqlite3_column_int(_psqlFindPlaylist, 0);
 	}
 	else
 	{
 		rc = sqlite3_bind_text(_psqlInsertPlaylist, 1, name.c_str(), -1, SQLITE_STATIC);
 		rc = sqlite3_bind_text(_psqlInsertPlaylist, 2, path.c_str(), -1, SQLITE_STATIC);
 		rc = sqlite3_step(_psqlInsertPlaylist);
-		_lastPlaylistId = sqlite3_last_insert_rowid(_db);
+		playlistId = sqlite3_last_insert_rowid(_db);
 		sqlite3_reset(_psqlInsertPlaylist);
 	}
-	_lastPlaylistPath = path;
 	sqlite3_reset(_psqlFindPlaylist);
 
-	return _lastPlaylistId;
+	return playlistId;
 }
 
-const string SQL_Insert_PlaylistTrack = "INSERT INTO PlaylistTrack(PlaylistId, TrackId) VALUES(?001, ?002);";
-void MusicLibDb::AddPlaylistTrack()
+const string SQL_Insert_PlaylistTrack = "INSERT INTO PlaylistTrack(PlaylistId, Number, TrackId) VALUES(?001, ?002, ?003);";
+void MusicLibDb::AddPlaylistTrack(int playlistId, int number, int trackId)
 {
-	/*
-	if(_lastPlaylistPath == path)
-		return _lastPlaylistId;
-
-	int rc = sqlite3_bind_text(_psqlFindPlaylist, 1, path, -1, SQLITE_STATIC);
-	if(SQLITE_ROW == (rc = sqlite3_step(_psqlFindPlaylist))
-	{
-		_lastPlaylistId = sqlite3_column_int(_psqlFindPlaylist, 0);
-	}
-	else
-	{
-		rc = sqlite3_bind_text(_psqlInsertPlaylist, 1, name, -1, SQLITE_STATIC);
-		rc = sqlite3_bind_text(_psqlInsertPlaylist, 2, path, -1, SQLITE_STATIC);
-		rc = sqlite3_step(_psqlInsertPlaylist);
-		_lastPlaylistId = sqlite3_last_insert_rowid(_db);
-		sqlite3_reset(_psqlInsertPlaylist);
-	}
-	_lastPlaylistPath = path;
-	_sqlite3_reset(_psqlFindPlaylist);
-
-	return _lastPlaylistId;*/
+	int rc = sqlite3_bind_int(_psqlInsertPlaylistTrack, 1, playlistId);
+	rc = sqlite3_bind_int(_psqlInsertPlaylistTrack, 2, number);
+	rc = sqlite3_bind_int(_psqlInsertPlaylistTrack, 3, trackId);
+	rc = sqlite3_step(_psqlInsertPlaylistTrack);
+	sqlite3_reset(_psqlInsertPlaylistTrack);
 }
 
 const string SQL_Save_Setting = "INSERT INTO Setting(Name,Value) VALUES(?001,?002);";
@@ -383,7 +433,7 @@ void MusicLibDb::PrepareAddStatements()
 	rc = sqlite3_prepare_v2(_db, SQL_Insert_Track.c_str(), -1, &_psqlInsertTrack, &tail);
 	rc = sqlite3_prepare_v2(_db, SQL_Insert_Playlist.c_str(), -1, &_psqlInsertPlaylist, &tail);
 	rc = sqlite3_prepare_v2(_db, SQL_Find_Playlist.c_str(), -1, &_psqlFindPlaylist, &tail);
-	//rc = sqlite3_prepare_v2(_db, SQL_Insert_PlaylistTrack, -1, &_psqlInsertPlaylistTrack, &tail);
+	rc = sqlite3_prepare_v2(_db, SQL_Insert_PlaylistTrack.c_str(), -1, &_psqlInsertPlaylistTrack, &tail);
 }
 
 void MusicLibDb::DisposeAddStatements()
@@ -398,7 +448,7 @@ void MusicLibDb::DisposeAddStatements()
 	rc = sqlite3_finalize(_psqlInsertTrack);
 	rc = sqlite3_finalize(_psqlInsertPlaylist);
 	rc = sqlite3_finalize(_psqlFindPlaylist);
-	//rc = sqlite3_finalize(_psqlInsertPlaylistTrack);
+	rc = sqlite3_finalize(_psqlInsertPlaylistTrack);
 }
 
 string MusicLibDb::TAG_UNKNOWN("Unknown");
@@ -500,7 +550,7 @@ void MusicLibDb::LoadAlbums(CascadeList_t& lst)
 
 void MusicLibDb::LoadPlaylists(CascadeList_t& lst)
 {
-	string sql("select Id, Name from Playlist order by Name;");
+	string sql("select Id, Name from Playlist where Id >= 0 order by Name;");
 	LoadList(lst, sql);
 }
 
@@ -544,6 +594,24 @@ void MusicLibDb::LoadTracksByPlaylist(CascadeList_t& lst, int playlistId)
 {
 	string sql("select t.Id, t.Title, t.Path from Track t inner join PlaylistTrack p on t.Id = p.TrackId where p.PlaylistId = ?001 order by p.Number;");
 	LoadList(lst, sql, playlistId);
+}
+
+int MusicLibDb::FindTrackByPath(const string& path)
+{
+	int id = -1;
+
+	string sql("select Id from Track where Path = ?001");
+	const char* tail;
+	sqlite3_stmt* pStmt;
+	int rc = sqlite3_prepare_v2(_db, sql.c_str(), -1, &pStmt, &tail);
+	rc = sqlite3_bind_text(pStmt, 1, path.c_str(), -1, SQLITE_STATIC);
+	if(SQLITE_ROW == (rc = sqlite3_step(pStmt)))
+	{
+		id = sqlite3_column_int(pStmt, 0);
+	}
+
+	rc = sqlite3_finalize(pStmt);
+	return id;
 }
 
 void MusicLibDb::LoadTracksRandomPick(CascadeList_t& lst, int count)
