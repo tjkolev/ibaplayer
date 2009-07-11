@@ -69,7 +69,7 @@ private:
     void            handlePlayButton(int);
     void            handleBrowseButton(int);
 //    void            startPlaying();
-    void            setMIDLabels();
+    void            setMIDLabels(bool waitSome = false);
     void            resetOBC();
     void            clearOBC();
     void            toBrowseMode();
@@ -77,7 +77,7 @@ private:
     mode                m_mode;
     bool                m_cdc_playing;
 
-    unsigned long       m_respDelay;
+    //unsigned long       m_respDelay;
 
     bool                m_outPos;
     bool                m_outInfo;

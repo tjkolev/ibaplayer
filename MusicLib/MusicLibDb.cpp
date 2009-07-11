@@ -596,6 +596,40 @@ void MusicLibDb::LoadTracksByPlaylist(CascadeList_t& lst, int playlistId)
 	LoadList(lst, sql, playlistId);
 }
 
+void MusicLibDb::LoadTracksByPaths(CascadeList_t& lst)
+{
+	if(lst.size() < 1)
+		return;
+
+	// TODO Optimize
+	for(CascadeList_t::iterator it = lst.begin(); it != lst.end(); it++)
+	{
+		ListItem& item = (*it);
+		FindTrackByPath(item);
+	}
+
+}
+
+int MusicLibDb::FindTrackByPath(ListItem& item)
+{
+	int id = -1;
+
+	string sql("select Id, Title from Track where Path = ?001");
+	const char* tail;
+	sqlite3_stmt* pStmt;
+	int rc = sqlite3_prepare_v2(_db, sql.c_str(), -1, &pStmt, &tail);
+	rc = sqlite3_bind_text(pStmt, 1, item.Path.c_str(), -1, SQLITE_STATIC);
+	if(SQLITE_ROW == (rc = sqlite3_step(pStmt)))
+	{
+		id = item.Id = sqlite3_column_int(pStmt, 0);
+		const char* sqlTxt = (const char*) sqlite3_column_text(pStmt, 1);
+		item.Name = string(sqlTxt);
+	}
+
+	rc = sqlite3_finalize(pStmt);
+	return id;
+}
+
 int MusicLibDb::FindTrackByPath(const string& path)
 {
 	int id = -1;

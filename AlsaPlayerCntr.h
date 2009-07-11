@@ -72,6 +72,8 @@ public:
     char* getTimeInfo();
     char* getMiscInfo();
 
+    int		GetPlaylist(CascadeList_t&);
+
 private:
     bool    startAp();
     void    stopAp();

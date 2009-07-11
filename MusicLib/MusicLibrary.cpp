@@ -174,22 +174,15 @@ const CascadeList_t& MusicLibBrowser::PlayQueue()
 	return _playQueue;
 }
 
-void MusicLibBrowser::PlayTrack(ListItem& item)
-{
-	PlayQueue(true).push_back(item);
-}
-
-void MusicLibBrowser::AddTrack(ListItem& item)
-{
-	PlayQueue(false).push_back(item);
-}
-
 const string& MusicLibBrowser::Select(bool withPlay, bool withAdd)
 {
 	if(_cascadeNdx < 0 || _cascadeNdx > 3)
 		_cascadeNdx = 0;
 
+	// the next cascade list to fill
 	CascadeList_t& targetList = _cascadeLists[_cascadeNdx < 3 ? _cascadeNdx + 1 : _cascadeNdx];
+	// the tracks selected to be played or added
+	CascadeList_t playList;
 	bool cascadeNext = false;
 
 	//load next list from db depending on top menu and the cascade depth
@@ -209,23 +202,21 @@ const string& MusicLibBrowser::Select(bool withPlay, bool withAdd)
 
 			case 1:
 				if(withPlay || withAdd)
-					_musicDb.LoadTracksByGenre(PlayQueue(withPlay), AtItem().Id);
+					_musicDb.LoadTracksByGenre(playList, AtItem().Id);
 				else
 					_musicDb.LoadAlbumsByGenre(targetList, AtItem().Id);
 				break;
 
 			case 2:
 				if(withPlay || withAdd)
-					_musicDb.LoadTracksByGenreAlbum(PlayQueue(withPlay), PrevItem().Id, AtItem().Id);
+					_musicDb.LoadTracksByGenreAlbum(playList, PrevItem().Id, AtItem().Id);
 				else
 					_musicDb.LoadTracksByGenreAlbum(targetList,	PrevItem().Id, AtItem().Id);
 				break;
 
 			case 3:
-				if(withAdd)
-					AddTrack(AtItem());
-				else
-					{withPlay = true; PlayTrack(AtItem());}
+				playList.push_back(AtItem());
+				withPlay = !withAdd;
 				break;
 			}
 
@@ -245,23 +236,21 @@ const string& MusicLibBrowser::Select(bool withPlay, bool withAdd)
 
 			case 1:
 				if(withPlay || withAdd)
-					_musicDb.LoadTracksByArtist(PlayQueue(withPlay), AtItem().Id);
+					_musicDb.LoadTracksByArtist(playList, AtItem().Id);
 				else
 					_musicDb.LoadAlbumsByArtist(targetList, AtItem().Id);
 				break;
 
 			case 2:
 				if(withPlay || withAdd)
-					_musicDb.LoadTracksByAlbum(PlayQueue(withPlay), AtItem().Id);
+					_musicDb.LoadTracksByAlbum(playList, AtItem().Id);
 				else
 					_musicDb.LoadTracksByAlbum(targetList, AtItem().Id);
 				break;
 
 			case 3:
-				if(withAdd)
-					AddTrack(AtItem());
-				else
-					{withPlay = true; PlayTrack(AtItem());}
+				playList.push_back(AtItem());
+				withPlay = !withAdd;
 				break;
 			}
 			break;
@@ -280,16 +269,14 @@ const string& MusicLibBrowser::Select(bool withPlay, bool withAdd)
 
 			case 1:
 				if(withPlay || withAdd)
-					_musicDb.LoadTracksByAlbum(PlayQueue(withPlay), AtItem().Id);
+					_musicDb.LoadTracksByAlbum(playList, AtItem().Id);
 				else
 					_musicDb.LoadTracksByAlbum(targetList, AtItem().Id);
 				break;
 
 			case 2:
-				if(withAdd)
-					AddTrack(AtItem());
-				else
-					{withPlay = true; PlayTrack(AtItem());}
+				playList.push_back(AtItem());
+				withPlay = !withAdd;
 				break;
 			}
 			break;
@@ -308,16 +295,14 @@ const string& MusicLibBrowser::Select(bool withPlay, bool withAdd)
 
 			case 1:
 				if(withPlay || withAdd)
-					_musicDb.LoadTracksByPlaylist(PlayQueue(withPlay), AtItem().Id);
+					_musicDb.LoadTracksByPlaylist(playList, AtItem().Id);
 				else
 					_musicDb.LoadTracksByPlaylist(targetList, AtItem().Id);
 				break;
 
 			case 2:
-				if(withAdd)
-					AddTrack(AtItem());
-				else
-					{withPlay = true; PlayTrack(AtItem());}
+				playList.push_back(AtItem());
+				withPlay = !withAdd;
 				break;
 			}
 			break;
@@ -370,10 +355,13 @@ const string& MusicLibBrowser::Select(bool withPlay, bool withAdd)
 			break;
 	}
 
-	if(withPlay || withAdd)
+	if(withPlay)
 	{
-		if(withPlay)
-			RequeueTracks();
+		PlayTracks(playList);
+	}
+	else if(withAdd)
+	{
+		AddTracks(playList);
 	}
 	else
 	{
@@ -387,14 +375,34 @@ const string& MusicLibBrowser::Select(bool withPlay, bool withAdd)
 	return AtItem().Name;
 }
 
-void MusicLibBrowser::RequeueTracks(bool savePlayQueue)
+void MusicLibBrowser::PlayTracks(const CascadeList_t& tracks)
+{
+	_playQueue.clear();
+	_playQueue = tracks;
+	_pAp->stop();
+	_pAp->clear();
+	_pAp->add(PlayQueue());
+	_pAp->play();
+	SavePlayQueue();
+}
+
+void MusicLibBrowser::AddTracks(const CascadeList_t& tracks)
+{
+	int cnt = tracks.size();
+	if(cnt < 1)
+		return;
+	_pAp->add(tracks);
+	for(int n = 0; n < cnt; n++)
+		_playQueue.push_back(tracks[n]);
+	SavePlayQueue();
+}
+
+void MusicLibBrowser::RequeueTracks()
 {
 	_pAp->stop();
 	_pAp->clear();
 	_pAp->add(PlayQueue());
 	_pAp->play();
-	if(savePlayQueue)
-		SavePlayQueue();
 }
 
 void MusicLibBrowser::OnNewTrack()

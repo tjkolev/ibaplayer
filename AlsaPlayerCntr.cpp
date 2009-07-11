@@ -202,6 +202,21 @@ void AlsaPlayerCntr::clear()
 }
 
 
+int AlsaPlayerCntr::GetPlaylist(CascadeList_t& lst)
+{
+	int trackCount = 0;
+	char**	theTracks;
+	ap_get_playlist(m_apSession, &trackCount, &theTracks);
+	if(trackCount < 1)
+		return 0;
+	for(int n = 0; n < trackCount; n++)
+	{
+		ListItem item(theTracks[n]);
+		lst.push_back(item);
+	}
+	return trackCount;
+}
+
 char* AlsaPlayerCntr::getTrack()
 {
 	fillInfo();

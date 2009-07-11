@@ -30,6 +30,7 @@ using namespace std;
 class ListItem
 {
 public:
+	ListItem(char* path);
 	ListItem(int id, string& name);
 	ListItem(int id, char* name);
 

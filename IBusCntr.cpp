@@ -224,19 +224,37 @@ void IBusCntr::sendPacket(const byte* packet, int packet_size)
     assert(packet);
     assert(packet_size > 0);
 
+	// The delay here is because the radio misses responces that are too fast.
+	// Additionally since the ibus is a single wire serial communication,
+	// collisions are to be expected. The code here attempts to handle this
+	// by resending the packet after increased wait.
 
-    if(!m_ibus.send(packet, packet_size))
-    {
-        unsigned long usec = m_respDelay/2;
-        unsigned long usec_incr = usec;
-        int attempt = 0;
+    unsigned long usec = m_respDelay;
+	usleep(usec);
 
-        do
-        {
-            usleep(usec+=usec_incr);
-        }
-        while(!m_ibus.send(packet, packet_size) && attempt++ < 5);
-    }
+	int attempt = 1;
+	while(!m_ibus.send(packet, packet_size) && attempt++ <= 5)
+	{
+
+		usec += usec/2;
+		ostringstream msg;
+		msg << "Sleeping " << usec << "us before " << attempt << " sendPacket attempt.";
+		Log(msg.str(), IBALogger::LOGS_DEBUG);
+		usleep(usec);
+	}
+
+//    if(!m_ibus.send(packet, packet_size))
+//    {
+//        unsigned long usec = m_respDelay/2;
+//        unsigned long usec_incr = usec;
+//        int attempt = 0;
+//
+//        do
+//        {
+//            usleep(usec+=usec_incr);
+//        }
+//        while(!m_ibus.send(packet, packet_size) && attempt++ < 5);
+//    }
 
 }
 
@@ -374,19 +392,23 @@ void IBusCntr::processRcvPacket()
     if(MIN_PACKET_LEN == *(m_inPacket+POFF_LEN) && IBUS_DATA_POLL_CDC[0] == *(m_inPacket+POFF_DATA))
     {
         //m_logger->log("Polled.", IBALogger::LOGS_DEBUG);
-        usleep(m_respDelay); // radio misses too fast responce
+        //usleep(m_respDelay); // radio misses too fast responce
         sendPacket(IBUS_PACK_RESPOND_POLL, sizeof(IBUS_PACK_RESPOND_POLL));
         return;
     }
 
     // place message in queue
-    IBusMsg ibus_msg;
-    IBusMsgQueue::fillMsg(&ibus_msg,
-                          *(m_inPacket+POFF_SRC),
-                          *(m_inPacket+POFF_DEST),
-                          m_inPacket+POFF_DATA,
-                          *(m_inPacket+POFF_LEN) - 2);
-    IBusMsgQueue::getQueue().put(&ibus_msg);
+    IBusMsg ibus_msg(
+		  *(m_inPacket+POFF_SRC),
+		  *(m_inPacket+POFF_DEST),
+		  m_inPacket+POFF_DATA,
+		  *(m_inPacket+POFF_LEN) - 2);
+//    IBusMsgQueue::fillMsg(&ibus_msg,
+//                          *(m_inPacket+POFF_SRC),
+//                          *(m_inPacket+POFF_DEST),
+//                          m_inPacket+POFF_DATA,
+//                          *(m_inPacket+POFF_LEN) - 2);
+    IBusMsgQueue::getQueue().enqueue(ibus_msg);
 }
 
 void IBusCntr::writeRadio(const char* txt)

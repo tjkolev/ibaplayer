@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
 	IBALogger::Logger().setLogLevel((IBALogger::Severity)sl);
 
 /* testing code */
-if(false)
+/*
 {
 	MusicLibDb musicDb;
 	musicDb.Open();
@@ -104,7 +104,7 @@ if(false)
 	PrintList(lst);
 	musicDb.Close();
 	return 0;
-}
+}*/
 /* end testing code */
 
 

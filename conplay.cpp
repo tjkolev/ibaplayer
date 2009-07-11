@@ -39,7 +39,7 @@ void consolePlay()
     br.Init(ap);
     br.LoadPlayQueue();
 
-    cout << "+:Next, -:Previous, u:PageUp, d:PageDown\nm:Menu, s:Select, p:Play, a:Add\n";
+    cout << ">:Next, <:Prev, +:Up, -:Down, u:PageUp, d:PageDown\nm:Menu, s:Select, p:Play, a:Add\n~:Shuffle, @:RandomPick\n";
 
     bool isBrowsing = true;
 

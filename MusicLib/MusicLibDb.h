@@ -62,6 +62,8 @@ public:
 	void LoadTracksByPlaylist(CascadeList_t& lst, int playlistId);
 	void LoadTracksRandomPick(CascadeList_t& lst, int count);
 	int FindTrackByPath(const string&);
+	int FindTrackByPath(ListItem&);
+	void LoadTracksByPaths(CascadeList_t&);
 	int LoadTrackCount();
 
 	template <typename T>

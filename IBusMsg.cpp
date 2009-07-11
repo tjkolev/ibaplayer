@@ -19,20 +19,18 @@
  ***************************************************************************/
 
 #include "IBusMsg.h"
+#include <semaphore.h>
+#include <queue>
 
 #define IBUS_MSG_TYPE       1
 
-IBusMsg* IBusMsgQueue::fillMsg(IBusMsg* msg, byte from, byte to, const byte* d, byte l)
+IBusMsg::IBusMsg(byte from, byte to, const byte* d, byte l)
 {
-    if(NULL == msg) return NULL;
-
-    msg->mtype   = IBUS_MSG_TYPE;
-
-    msg->devFrom = from;
-    msg->devTo   = to;
-    memcpy(msg->data, d, l);
-    msg->len     = l;
-    return msg;
+    devFrom = from;
+    devTo = to;
+    len = l;
+    if(NULL != d && l > 0)
+		memcpy(data, d, l);
 }
 
 // the single message queue
@@ -42,77 +40,42 @@ IBusMsgQueue& IBusMsgQueue::getQueue()
     return m_msgQueue;
 }
 
+sem_t sem;
 IBusMsgQueue::IBusMsgQueue()
 {
-    key_t mqKey = ftok(".", 0x01BA);
-
-    m_mqId = msgget(mqKey, IPC_CREAT | 0660);
-    if(m_mqId < 0) // failed.
-        return;
+	m_semaphore = &sem;
+	sem_init(&sem, 0, 1);
 }
 
 IBusMsgQueue::~IBusMsgQueue()
 {
-    if(m_mqId < 0)
-        return;
-
-    // delete the queue
-    msgctl(m_mqId, IPC_RMID, NULL);
-
-    m_mqId = -1;
+	sem_destroy(&sem);
 }
 
-void IBusMsgQueue::put(IBusMsg* msg)
+queue<IBusMsg> theQueue;
+void IBusMsgQueue::enqueue(IBusMsg& msg)
 {
-    if(NULL == msg || m_mqId < 0) return;
+	if(sem_wait(&sem) < 0)
+		return;
+	theQueue.push(msg);
+	sem_post(&sem);
+}
 
-    int msize = sizeof(IBusMsg) - sizeof(msg->mtype);
-    int result = msgsnd(m_mqId, msg, msize, IPC_NOWAIT);
-    if(result < 0)
-        perror("Failed to put message in queue");
+IBusMsg IBusMsgQueue::dequeue()
+{
+	if(sem_wait(&sem) < 0)
+		return IBusMsg(0, 0, NULL, 0);
+	IBusMsg msg = theQueue.front();
+	theQueue.pop();
+	sem_post(&sem);
+	return msg;
 }
 
 bool IBusMsgQueue::hasMsg()
 {
-    if(m_mqId < 0)
-        return false;
-
-    int result = msgrcv(m_mqId, NULL, 0, IBUS_MSG_TYPE, IPC_NOWAIT);
-    if(result < 1 && errno == E2BIG)
-        return true;
-
-    return false;
+	if(sem_wait(&sem) < 0)
+		return false;
+	bool empty = theQueue.empty();
+	sem_post(&sem);
+	return !empty;
 }
-
-IBusMsg* IBusMsgQueue::get(IBusMsg* msg)
-{
-    if(NULL == msg || m_mqId < 0) return NULL;
-
-    int msize = sizeof(IBusMsg) - sizeof(msg->mtype);
-    int result = msgrcv(m_mqId, msg, msize, IBUS_MSG_TYPE, IPC_NOWAIT);
-    if(result < 0)
-    {
-        if(errno == ENOMSG)
-            return NULL;
-
-        perror("Failed to get message from queue");
-        return NULL;
-    }
-
-    return msg;
-}
-
-/*void IBusMsgQueue::clear()
-{
-    pthread_mutex_lock(&m_mutex);
-
-    // destroy all unpicked objects in queue;
-    for(int ndx = m_tail; m_tail != m_head; m_tail = (m_tail + 1) % QUEUE_SIZE)
-        delete m_queue[ndx];
-
-    m_head = 0;
-    m_tail = m_head;
-
-    pthread_mutex_unlock(&m_mutex);
-}*/
-

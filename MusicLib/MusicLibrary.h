@@ -71,9 +71,9 @@ private:
 	ListItem& 			AtItem();
 	ListItem&			PrevItem();
 	CascadeList_t&		PlayQueue(bool clear);
-	void				AddTrack(ListItem&);
-	void				PlayTrack(ListItem&);
-	void				RequeueTracks(bool savePlayQueue = true);
+	void				RequeueTracks();
+	void				PlayTracks(const CascadeList_t&);
+	void				AddTracks(const CascadeList_t&);
 	int					GetPlayQueueNdx(string& trackPath);
 	const string&		GoOffset(int);
 	int					ListPageSize();

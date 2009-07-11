@@ -70,7 +70,7 @@ MsgProcessor::MsgProcessor()
 
     m_mode = MODE_INACTIVE;
     m_cdc_playing = false;
-    m_respDelay = 10000;
+    //m_respDelay = 10000;
     m_outPos = false;
     m_outInfo = false;
     m_dispInfoNdx = 0;
@@ -113,8 +113,8 @@ bool MsgProcessor::init(IBATimers& timers)
 	m_ibusStatusTimeout = GetConfigValue<int>(PRMS_IBUS_STATUS_TIMEOUT);
 	m_browseTimeout = GetConfigValue<int>(PRMS_BROWSE_TIMEOUT);
 
-    int delay = GetConfigValue<int>(PRMS_IBUS_RESPONSE_DELAY);
-    m_respDelay = delay * 1000;
+    //int delay = GetConfigValue<int>(PRMS_IBUS_RESPONSE_DELAY);
+    //m_respDelay = delay * 1000;
 
     m_scrollTrackInfo = GetConfigValue<bool>(PRMS_SCROLL_TRACK_INFO);
     m_scrollChars = GetConfigValue<int>(PRMS_TRACK_INFO_SCROLL_CHARS);
@@ -126,6 +126,7 @@ bool MsgProcessor::init(IBATimers& timers)
 
 	m_lib.LoadPlayQueue();
 	m_alsa.pause(); // wait until request is received from radio
+	m_alsa.setLoop(true);
 
     // start a separate thread for ibus serial handling
     Log("Preparing ibus thread.", IBALogger::LOGS_DEBUG);
@@ -235,10 +236,11 @@ void MsgProcessor::resetOBC()
     m_ibus.sendPacket(IBUS_DEV_IKE, IBUS_DEV_OBC, IBUS_RESET_OBC_LCD, sizeof(IBUS_RESET_OBC_LCD));
 }
 
-void MsgProcessor::setMIDLabels()
+void MsgProcessor::setMIDLabels(bool waitSome)
 {
     // wait a bit before setting up the labels to be sure to overwrite any the radio sets.
-    //usleep(150000);
+    if(waitSome)
+		usleep(150000);
 
     time(&m_lblTime);
 
@@ -277,8 +279,6 @@ void MsgProcessor::processIBUSmsg(void* msg)
     IBusMsg* ibusMsg = (IBusMsg*) msg;
     assert(IBUS_DEV_RADIO == ibusMsg->devFrom && IBUS_DEV_CD_CHANGER == ibusMsg->devTo);
 
-    usleep(m_respDelay); // radio misses fast responces
-
     int datalen = sizeof(IBUS_DATA_INFO_CDC);
     int button = 0;
     if(0 == memcmp(ibusMsg->data, IBUS_DATA_INFO_CDC, datalen))
@@ -290,32 +290,30 @@ void MsgProcessor::processIBUSmsg(void* msg)
     else if(0 == memcmp(ibusMsg->data, IBUS_DATA_START_PLAY, datalen))
     {
         Log("Radio: Start Play.", IBALogger::LOGS_DEBUG);
+		m_alsa.play();
         m_ibus.sendPacket(IBUS_PACK_START_PLAYING_1_1, sizeof(IBUS_PACK_START_PLAYING_1_1));
         m_ibus.sendPacket(IBUS_PACK_PLAYING_1_1, sizeof(IBUS_PACK_PLAYING_1_1));
 		m_mode = MODE_PLAY;
-		setMIDLabels();
-		if(!m_alsa.isPlaying())
-			m_alsa.play();
-        if(!m_cdc_playing)
+        //if(!m_cdc_playing)
         {
             m_cdc_playing = true;
             m_ibus.setCDCplaying(m_cdc_playing);
         }
+		setMIDLabels(true);
         return;
     }
     else if(0 == memcmp(ibusMsg->data, IBUS_DATA_STOP_PLAY, datalen))
     {
         Log("Radio: Stop Play.", IBALogger::LOGS_DEBUG);
+		m_alsa.pause();
         m_ibus.sendPacket(IBUS_PACK_NOT_PLAYING_0_0, sizeof(IBUS_PACK_NOT_PLAYING_0_0));
 		m_mode = MODE_INACTIVE;
-		setMIDLabels();
-		if(m_alsa.isPlaying())
-			m_alsa.pause();
-        if(m_cdc_playing)
+        //if(m_cdc_playing)
         {
             m_cdc_playing = false;
             m_ibus.setCDCplaying(m_cdc_playing);
         }
+		setMIDLabels(true);
         return;
     }
 
@@ -513,12 +511,12 @@ void MsgProcessor::toBrowseMode()
 void MsgProcessor::checkForMsg()
 {
     IBusMsgQueue& msgQ = IBusMsgQueue::getQueue();
-    if(!msgQ.hasMsg())
-        return;
-
-    IBusMsg msg;
-    while(NULL != msgQ.get(&msg))
-        processIBUSmsg(&msg);
+    while(msgQ.hasMsg())
+    {
+		IBusMsg msg = msgQ.dequeue();
+		if(msg.len > 0)
+			processIBUSmsg(&msg);
+    }
 }
 
 
@@ -532,21 +530,33 @@ void MsgProcessor::alternateTrackInfo()
     {
         case 0: // title
             trackInfo = m_alsa.getTitle();
+            if(NULL == trackInfo)
+				Log("Title is null", IBALogger::LOGS_DEBUG);
             break;
 
         case 1: // artist
             trackInfo = m_alsa.getArtist();
+            if(NULL == trackInfo)
+				Log("Artist is null", IBALogger::LOGS_DEBUG);
             break;
 
         case 2: // album
             trackInfo = m_alsa.getAlbum();
+            if(NULL == trackInfo)
+				Log("Album is null", IBALogger::LOGS_DEBUG);
             break;
 
         default: // 3 misc info
             trackInfo = m_alsa.getMiscInfo();
+            if(NULL == trackInfo)
+				Log("Default is null", IBALogger::LOGS_DEBUG);
     }
 
-    if(!trackInfo[0]) // empty string
+	if(NULL == trackInfo)
+	{
+		trackInfo = "No info";
+	}
+    else if(!trackInfo[0]) // empty string
     {
         trackInfo = m_alsa.getFileName();
         skip = true;

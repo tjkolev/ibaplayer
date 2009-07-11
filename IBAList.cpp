@@ -32,6 +32,12 @@ ListItem::ListItem(int id, char* name)
 	Name = name;
 }
 
+ListItem::ListItem(char* path)
+{
+	Path = path;
+	Id = -1;
+}
+
 ListItem CascadeList_t::EMPTY(0, "[Empty]");
 
 ListItem& CascadeList_t::AtItem()

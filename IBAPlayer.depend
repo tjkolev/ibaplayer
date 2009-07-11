@@ -242,7 +242,7 @@
 	<iostream>
 	<fstream>
 
-1241983308 source:/home/tjkolev/src/IBAPlayer/IBAPlayer.cpp
+1246217509 source:/home/tjkolev/src/IBAPlayer/IBAPlayer.cpp
 	<assert.h>
 	"IBAVer.h"
 	"IBAPlayer.h"
@@ -253,7 +253,7 @@
 
 1237671485 /home/tjkolev/src/IBAPlayer/IBAVer.h
 
-1240177280 /home/tjkolev/src/IBAPlayer/MusicLib/MusicLibrary.h
+1245710805 /home/tjkolev/src/IBAPlayer/MusicLib/MusicLibrary.h
 	"../IBAList.h"
 	"MusicLibDb.h"
 	"../AlsaPlayerCntr.h"
@@ -269,11 +269,11 @@
 	<map>
 	<iostream>
 
-1242773994 /home/tjkolev/src/IBAPlayer/AlsaPlayerCntr.h
+1245107625 /home/tjkolev/src/IBAPlayer/AlsaPlayerCntr.h
 	"control.h"
 	"IBAList.h"
 
-1241982184 /home/tjkolev/src/IBAPlayer/IBusCntr.h
+1244993544 /home/tjkolev/src/IBAPlayer/IBusCntr.h
 	"IBusPort.h"
 	"IBATimers.h"
 
@@ -284,7 +284,7 @@
 	<signal.h>
 	<time.h>
 
-1242773187 /home/tjkolev/src/IBAPlayer/MusicLib/MusicLibDb.h
+1245156593 /home/tjkolev/src/IBAPlayer/MusicLib/MusicLibDb.h
 	<tag.h>
 	"../sqlite3/sqlite3.h"
 	"../IBAConfig.h"
@@ -294,7 +294,7 @@
 1234905367 /home/tjkolev/src/IBAPlayer/sqlite3/sqlite3.h
 	<stdarg.h>
 
-1242773305 source:/home/tjkolev/src/IBAPlayer/MusicLib/MusicLibDb.cpp
+1245675541 source:/home/tjkolev/src/IBAPlayer/MusicLib/MusicLibDb.cpp
 	<fstream>
 	"fileref.h"
 	"file_iterator.h"
@@ -327,7 +327,7 @@
 1236921578 /home/tjkolev/src/IBAPlayer/FileSys/file_iterator-impl.h
 	<algorithm>
 
-1242774052 source:/home/tjkolev/src/IBAPlayer/AlsaPlayerCntr.cpp
+1245108301 source:/home/tjkolev/src/IBAPlayer/AlsaPlayerCntr.cpp
 	<tag.h>
 	"fileref.h"
 	"IBALogger.h"
@@ -357,20 +357,20 @@
 	<string>
 	"IBATimers.h"
 
-1241983420 source:/home/tjkolev/src/IBAPlayer/IBusCntr.cpp
+1245730312 source:/home/tjkolev/src/IBAPlayer/IBusCntr.cpp
 	<assert.h>
 	"IBAConfig.h"
 	"IBALogger.h"
 	"IBusCntr.h"
 	"IBusMsg.h"
 
-1237671485 /home/tjkolev/src/IBAPlayer/IBusMsg.h
-	<errno.h>
-	<sys/msg.h>
+1246233084 /home/tjkolev/src/IBAPlayer/IBusMsg.h
 	"IBusCntr.h"
 
-1239339707 source:/home/tjkolev/src/IBAPlayer/IBusMsg.cpp
+1246233028 source:/home/tjkolev/src/IBAPlayer/IBusMsg.cpp
 	"IBusMsg.h"
+	<semaphore.h>
+	<queue>
 
 1242087946 source:/home/tjkolev/src/IBAPlayer/IBusPort.cpp
 	<termios.h>
@@ -381,7 +381,7 @@
 	"IBAConfig.h"
 	"IBALogger.h"
 
-1242347714 source:/home/tjkolev/src/IBAPlayer/MsgProcessor.cpp
+1246233458 source:/home/tjkolev/src/IBAPlayer/MsgProcessor.cpp
 	<assert.h>
 	"IBusMsg.h"
 	"MsgProcessor.h"
@@ -393,7 +393,7 @@
 	"file_iterator.h"
 	<fstream>
 
-1242345396 source:/home/tjkolev/src/IBAPlayer/MusicLib/MusicLibrary.cpp
+1245710717 source:/home/tjkolev/src/IBAPlayer/MusicLib/MusicLibrary.cpp
 	<assert.h>
 	"MusicLibrary.h"
 	"../IBAConfig.h"
@@ -406,7 +406,7 @@
 1236921578 source:/home/tjkolev/src/IBAPlayer/MusicLib/TrackRec.cpp
 	"TrackRec.h"
 
-1242737762 source:/home/tjkolev/src/IBAPlayer/conplay.cpp
+1246220273 source:/home/tjkolev/src/IBAPlayer/conplay.cpp
 	<iostream>
 	"MusicLib/MusicLibrary.h"
 
@@ -451,14 +451,14 @@
 	<unicode/ubrk.h>
 	<unicode/utf16.h>
 
-1239627780 /home/tjkolev/src/IBAPlayer/IBAList.h
+1245108182 /home/tjkolev/src/IBAPlayer/IBAList.h
 	<string>
 	<vector>
 
-1239627923 source:/home/tjkolev/src/IBAPlayer/IBAList.cpp
+1245108241 source:/home/tjkolev/src/IBAPlayer/IBAList.cpp
 	"IBAList.h"
 
-1242346773 /home/tjkolev/src/IBAPlayer/MsgProcessor.h
+1246233431 /home/tjkolev/src/IBAPlayer/MsgProcessor.h
 	<string>
 	"IBATimers.h"
 	"IBusCntr.h"

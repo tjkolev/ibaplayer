@@ -21,21 +21,17 @@
 #ifndef _IBUS_MSG_H_
 #define _IBUS_MSG_H_
 
-#include <errno.h>
-#include <sys/msg.h>
-
 #include "IBusCntr.h"
 
-struct IBusMsg // custom definition for mag.h/msgbuf
+class IBusMsg // custom definition for mag.h/msgbuf
 {
-    long int mtype; // as required for ipc
-
+public:
     byte    devFrom;
     byte    devTo;
     byte    data[IBusCntr::MAX_PACKET_LEN];
     byte    len;
 
-    //IBusMsg(byte from, byte to, const byte* d, byte l);
+    IBusMsg(byte from, byte to, const byte* d, byte l);
 };
 
 class IBusMsgQueue
@@ -43,12 +39,9 @@ class IBusMsgQueue
 public:
     static IBusMsgQueue& getQueue();
 
-    static IBusMsg* fillMsg(IBusMsg*, byte from, byte to, const byte* d, byte l);
-
     bool       hasMsg();
-    void       put(IBusMsg*);
-    IBusMsg*   get(IBusMsg*);
-    //void       clear();
+    void       enqueue(IBusMsg&);
+    IBusMsg    dequeue();
 
 private:
     IBusMsgQueue();
@@ -56,16 +49,8 @@ private:
 
     static IBusMsgQueue  m_msgQueue;
 
-    int             m_mqId;
+	void* m_semaphore;
 
-    /*
-    static const int     QUEUE_SIZE = 8;
-    IBusMsg*             m_queue[QUEUE_SIZE];
-    int                  m_head;
-    int                  m_tail;
-
-    pthread_mutex_t      m_mutex;
-    */
 };
 
 #endif //_IBUS_MSG_H_
